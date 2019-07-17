@@ -18,6 +18,9 @@ type Config struct {
 		Port   string `default:"8080"`
 		Secret string
 	}
+	Database struct {
+		Filename string `default:"gmail_backup.db"`
+	}
 }
 
 // Load loads the config file

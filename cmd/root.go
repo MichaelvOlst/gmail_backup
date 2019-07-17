@@ -4,6 +4,7 @@ import (
 	"gmail_backup/pkg/config"
 	"os"
 
+	"github.com/asdine/storm"
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 )
@@ -11,6 +12,7 @@ import (
 // App start point of this app
 type App struct {
 	config *config.Config
+	db     *storm.DB
 }
 
 var configFile string
@@ -35,13 +37,22 @@ func initApp() {
 		os.Exit(1)
 	}
 
+	db, err := storm.Open(config.Database.Filename)
+	if err != nil {
+		log.Fatalf("Could not open db: %v\n", err)
+	}
+
 	app = &App{}
 	app.config = config
+	app.db = db
 }
 
 var rootCmd = &cobra.Command{
 	Use:   "Gmail backup",
 	Short: "It will back up gmail accounts",
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		app.db.Close()
+	},
 }
 
 // Execute ..
