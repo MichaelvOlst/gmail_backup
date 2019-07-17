@@ -18,7 +18,7 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts the server",
 	Run: func(cmd *cobra.Command, args []string) {
-		a := api.New(app.config)
+		a := api.New(app.config, app.db)
 		e := a.Routes()
 
 		address := app.config.Server.Host + ":" + app.config.Server.Port

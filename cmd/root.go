@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"gmail_backup/pkg/config"
+	"gmail_backup/pkg/database"
 	"os"
 
-	"github.com/asdine/storm"
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 )
@@ -12,7 +12,7 @@ import (
 // App start point of this app
 type App struct {
 	config *config.Config
-	db     *storm.DB
+	db     *database.Store
 }
 
 var configFile string
@@ -37,7 +37,7 @@ func initApp() {
 		os.Exit(1)
 	}
 
-	db, err := storm.Open(config.Database.Filename)
+	db, err := database.New(config)
 	if err != nil {
 		log.Fatalf("Could not open db: %v\n", err)
 	}
