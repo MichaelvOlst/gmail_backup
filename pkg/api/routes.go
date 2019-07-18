@@ -1,6 +1,8 @@
 package api
 
 import (
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -11,6 +13,7 @@ func (a *API) Routes() *echo.Echo {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(a.config.Server.Secret))))
 
 	e.File("/", "public/index.html")
 

@@ -15,9 +15,7 @@ var newUserCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		u := models.NewUser(email, name, password)
-
 		u, err := app.db.CreateUser(u)
-
 		if err != nil {
 			log.Fatalf("Could not create user: %s\n", err)
 		}

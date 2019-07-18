@@ -19,6 +19,7 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/echo-contrib v0.6.0
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/labstack/gommon v0.2.9
 	github.com/magiconair/properties v1.8.1 // indirect

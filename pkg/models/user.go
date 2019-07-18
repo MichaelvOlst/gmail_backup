@@ -11,7 +11,7 @@ type User struct {
 	ID       int    `json:"id" storm:"id,increment"`
 	Name     string `json:"name"`
 	Email    string `json:"email" storm:"unique"`
-	Password string `json:"-"`
+	Password string `json:"password"`
 }
 
 // NewUser creates a new User with the given email and password

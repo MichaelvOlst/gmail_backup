@@ -27,3 +27,13 @@ func (s *Store) DeleteUser(e string) error {
 
 	return nil
 }
+
+// GetUserByEmail gets the user by email
+func (s *Store) GetUserByEmail(e string) (*models.User, error) {
+	var u models.User
+	err := s.One("Email", e, &u)
+	if err != nil {
+		return nil, err
+	}
+	return &u, nil
+}

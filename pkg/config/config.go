@@ -27,7 +27,7 @@ type Config struct {
 func Load(file string) error {
 
 	if file == "" {
-		log.Warn("Using default config")
+		// log.Warn("Using default config")
 		return nil
 	}
 
