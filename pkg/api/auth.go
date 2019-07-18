@@ -48,7 +48,6 @@ func (a *API) LoginHandler(c echo.Context) error {
 
 // LogoutHandler starts the server
 func (a *API) LogoutHandler(c echo.Context) error {
-
 	session, _ := session.Get("auth", c)
 	if !session.IsNew {
 		session.Options.MaxAge = -1
