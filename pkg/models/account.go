@@ -8,6 +8,7 @@ import (
 type Account struct {
 	ID             int       `json:"id" storm:"id,increment"`
 	Email          string    `json:"email" storm:"unique"`
+	EncryptionKey  string    `json:"encryption_key"`
 	Attachments    bool      `json:"attachments"`
 	BackupComplete bool      `json:"backup_complete"`
 	BackupDate     time.Time `json:"backup_date"`
