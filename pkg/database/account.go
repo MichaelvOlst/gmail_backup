@@ -29,3 +29,12 @@ func (s *Store) UpdateAccount(ac *models.Account) (*models.Account, error) {
 	}
 	return ac, nil
 }
+
+// DeleteAccount updates an account
+func (s *Store) DeleteAccount(ac *models.Account) error {
+	err := s.DeleteStruct(ac)
+	if err != nil {
+		return err
+	}
+	return nil
+}

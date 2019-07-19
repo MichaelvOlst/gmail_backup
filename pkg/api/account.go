@@ -43,7 +43,7 @@ func (a *API) UpdateAccountHandler(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	ac, err := a.db.GetAccountByID(id)
-	if err != nil {
+	if err != nil && err != storm.ErrNotFound {
 		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
 	}
 
@@ -67,6 +67,21 @@ func (a *API) UpdateAccountHandler(c echo.Context) error {
 
 // DeleteAccountHandler Deletes an account
 func (a *API) DeleteAccountHandler(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
 
-	return c.JSON(http.StatusOK, envelope{Result: "Delete account"})
+	ac, err := a.db.GetAccountByID(id)
+	if err != nil && err != storm.ErrNotFound {
+		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+	}
+
+	if err == storm.ErrNotFound {
+		return c.JSON(http.StatusUnprocessableEntity, envelope{Error: "Account not found"})
+	}
+
+	err = a.db.DeleteAccount(ac)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+	}
+
+	return c.JSON(http.StatusNoContent, nil)
 }

@@ -58,3 +58,27 @@ func (a *API) LogoutHandler(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, envelope{Result: true})
 }
+
+// apiMiddleware middleware adds a `Server` header to the response.
+func (a *API) apiMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		session, err := session.Get("auth", c)
+		// an err is returned if cookie has been tampered with, so check that
+		if err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, envelope{Error: "unauthorized"})
+		}
+
+		userID, ok := session.Values["user_id"]
+		if session.IsNew || !ok {
+			return echo.NewHTTPError(http.StatusUnauthorized, envelope{Error: "unauthorized"})
+		}
+
+		// validate user ID in session
+		if _, err := a.db.GetUserByID(userID.(int)); err != nil {
+			return echo.NewHTTPError(http.StatusUnauthorized, envelope{Error: "unauthorized"})
+		}
+
+		return next(c)
+	}
+}

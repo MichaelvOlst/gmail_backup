@@ -37,3 +37,13 @@ func (s *Store) GetUserByEmail(e string) (*models.User, error) {
 	}
 	return &u, nil
 }
+
+// GetUserByID gets the user by email
+func (s *Store) GetUserByID(ID int) (*models.User, error) {
+	var u models.User
+	err := s.One("ID", ID, &u)
+	if err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
