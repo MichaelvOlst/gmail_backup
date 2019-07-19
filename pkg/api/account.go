@@ -41,7 +41,28 @@ func (a *API) CreateAccountHandler(c echo.Context) error {
 // UpdateAccountHandler Updates an account
 func (a *API) UpdateAccountHandler(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	return c.JSON(http.StatusOK, envelope{Result: "Update account " + id})
+
+	ac, err := a.db.GetAccountByID(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+	}
+
+	if err == storm.ErrNotFound {
+		return c.JSON(http.StatusUnprocessableEntity, envelope{Error: "Account not found"})
+	}
+
+	var uc models.Account
+	if err := c.Bind(&uc); err != nil {
+		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+	}
+
+	uc.ID = ac.ID
+	nc, err := a.db.UpdateAccount(&uc)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+	}
+
+	return c.JSON(http.StatusOK, envelope{Result: nc})
 }
 
 // DeleteAccountHandler Deletes an account
