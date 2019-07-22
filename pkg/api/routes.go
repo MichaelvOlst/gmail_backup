@@ -16,15 +16,16 @@ func (a *API) Routes() *echo.Echo {
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(a.config.Server.Secret))))
 
 	e.File("/", "public/index.html")
+	e.File("/js/app.js", "public/js/app.js")
 
 	e.POST("/auth/login", a.LoginHandler)
 	e.POST("/auth/logout", a.LogoutHandler)
 
 	api := e.Group("/api")
-	// api.Use(a.apiMiddleware)
+	api.Use(a.apiMiddleware)
 
 	api.GET("/accounts", a.GetAccountsHandler)
-	api.GET("/account/:id/backup", a.BackupAccount)
+	// api.GET("/account/:id/backup", a.BackupAccount)
 	api.POST("/account", a.CreateAccountHandler)
 	api.PATCH("/account/:id", a.UpdateAccountHandler)
 	api.DELETE("/account/:id", a.DeleteAccountHandler)
