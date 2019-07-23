@@ -20,6 +20,7 @@ func (a *API) Routes() *echo.Echo {
 
 	e.POST("/auth/login", a.LoginHandler)
 	e.POST("/auth/logout", a.LogoutHandler)
+	e.GET("/auth/session", a.SessionHandler)
 
 	api := e.Group("/api")
 	api.Use(a.apiMiddleware)
@@ -29,5 +30,7 @@ func (a *API) Routes() *echo.Echo {
 	api.POST("/account", a.CreateAccountHandler)
 	api.PATCH("/account/:id", a.UpdateAccountHandler)
 	api.DELETE("/account/:id", a.DeleteAccountHandler)
+
+	e.File("/*", "public/index.html")
 	return e
 }

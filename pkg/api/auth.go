@@ -59,6 +59,16 @@ func (a *API) LogoutHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, envelope{Result: true})
 }
 
+// SessionHandler starts the server
+func (a *API) SessionHandler(c echo.Context) error {
+	session, _ := session.Get("auth", c)
+	if !session.IsNew {
+		return c.JSON(http.StatusOK, envelope{Result: true})
+	}
+
+	return c.JSON(http.StatusOK, envelope{Result: false})
+}
+
 // apiMiddleware middleware adds a `Server` header to the response.
 func (a *API) apiMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
