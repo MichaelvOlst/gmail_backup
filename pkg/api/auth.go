@@ -21,6 +21,9 @@ func (l *login) Sanitize() {
 
 // LoginHandler starts the server
 func (a *API) LoginHandler(c echo.Context) error {
+	// res := c.Request().Body
+	// fmt.Printf("%v\n", res)
+	// fmt.Println("")
 	var l login
 	if err := c.Bind(&l); err != nil {
 		return err

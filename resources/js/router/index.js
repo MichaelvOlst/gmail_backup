@@ -2,11 +2,12 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import store from './../store'
 
+import { CHECK_AUTH } from './../store/modules/types';
 
 Vue.use(Router)
 
-import Login from '../components/pages/Login.vue';
-import Dashboard from '../components/pages/Dashboard.vue';
+import Login from '../pages/Login.vue';
+import Dashboard from '../pages/Dashboard.vue';
 
 const router = new Router({
   mode: 'history',
@@ -18,17 +19,17 @@ const router = new Router({
   ]
 })
 
-
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!store.getters.isAuthenticated) {
-      next({
-        path: '/login',
-        query: { redirect: to.fullPath }
+
+    store.dispatch(CHECK_AUTH)
+      .then(next)
+      .catch(() => {
+        next({
+          path: '/login',
+          query: { redirect: to.fullPath }
+        })
       })
-    } else {
-      next()
-    }
   } else {
     next()
   }

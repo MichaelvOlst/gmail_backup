@@ -4,10 +4,11 @@ import {
   CHECK_AUTH
 } from './types';
 // import { SET_AUTH, PURGE_AUTH, SET_ERROR } from './mutations.type';
+import axios from 'axios';
 
 const state = {
   errors: null,
-  isAuthenticated: true
+  isAuthenticated: false
 };
 
 const getters = {
@@ -17,50 +18,57 @@ const getters = {
 };
 
 const actions = {
-  [LOGIN](context, credentials) {
+  [LOGIN]({commit}, data) {
     return new Promise(resolve => {
-    //   ApiService.post("users/login", { user: credentials })
-    //     .then(({ data }) => {
-    //       context.commit(SET_AUTH, data.user);
-    //       resolve(data);
-    //     })
-    //     .catch(({ response }) => {
-    //       context.commit(SET_ERROR, response.data.errors);
-    //     });
+      console.log(data);
+      axios.post('/auth/login', data)
+        .then(({data}) => {
+          commit('auth_success')
+          resolve(data)
+        })
+        .catch( () => {
+          commit('auth_error')
+        })
     });
   },
   [LOGOUT](context) {
     // context.commit(PURGE_AUTH);
   },
  
-  [CHECK_AUTH](context) {
-    // if (JwtService.getToken()) {
-    //   ApiService.setHeader();
-    //   ApiService.get("user")
-    //     .then(({ data }) => {
-    //       context.commit(SET_AUTH, data.user);
-    //     })
-    //     .catch(({ response }) => {
-    //       context.commit(SET_ERROR, response.data.errors);
-    //     });
-    // } else {
-    //   context.commit(PURGE_AUTH);
-    // }
+  [CHECK_AUTH]({commit}) {    
+    return new Promise((resolve, reject) => {
+      // commit('auth_request')
+      axios.get('/auth/session')
+        .then(response => {          
+          if(response.data.result === false) {
+            commit('auth_error')
+            reject(response)
+            return
+          }
+
+          localStorage.setItem('loggedIn', true)
+          resolve(response)
+          commit('auth_success')
+        })
+        .catch(err => {
+          commit('auth_error')
+          localStorage.removeItem('loggedIn')
+          reject(err)
+        })
+    })
   },
 };
 
 const mutations = {
-//   [SET_ERROR](state, error) {
-//     state.errors = error;
-//   },
-//   [SET_AUTH](state, user) {
-//     state.isAuthenticated = true;
-//     state.errors = {};
-//   },
-//   [PURGE_AUTH](state) {
-//     state.isAuthenticated = false;
-//     state.errors = {};
-//   }
+
+  auth_succes(state) {
+    state.isAuthenticated = true;
+  },
+
+  auth_error(state) {
+    state.isAuthenticated = false;
+    state.errors = {};
+  }
 };
 
 export default {

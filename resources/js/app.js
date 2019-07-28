@@ -5,6 +5,9 @@ import Vuetify from 'vuetify'
 Vue.use(Vuetify)
 import 'vuetify/dist/vuetify.min.css'
 
+window.axios = require('axios');
+window.axios.defaults.baseURL = window.location.origin
+
 import store from './store';
 
 import { createRouter } from './router'

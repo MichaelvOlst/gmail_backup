@@ -2,19 +2,21 @@
   <v-app id="gmail_backup">
     <v-navigation-drawer fixed clipped class="grey lighten-4" app>
       <v-list dense class="grey lighten-4">        
-          <v-list-tile>
+          <v-list-tile to="dashboard">
             <v-list-tile-action>
             <v-icon>dashboard</v-icon>
             </v-list-tile-action>
-            <v-list-tile-title>Dashboard</v-list-tile-title>
+            <v-list-tile-title>
+              Dashboard
+            </v-list-tile-title>
         </v-list-tile>
-        <v-list-tile>
+        <v-list-tile to="accounts">
             <v-list-tile-action>
             <v-icon>people</v-icon>
             </v-list-tile-action>
             <v-list-tile-title>Account</v-list-tile-title>
         </v-list-tile>
-          <v-list-tile>
+        <v-list-tile to="settings">
             <v-list-tile-action>
             <v-icon>settings</v-icon>
             </v-list-tile-action>
