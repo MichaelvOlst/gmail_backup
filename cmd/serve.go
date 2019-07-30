@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gobuffalo/packr"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +19,9 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts the server",
 	Run: func(cmd *cobra.Command, args []string) {
-		a := api.New(app.config, app.db)
+
+		box := packr.NewBox("./../public")
+		a := api.New(app.config, app.db, &box)
 		e := a.Routes()
 
 		address := app.config.Server.Host + ":" + app.config.Server.Port
