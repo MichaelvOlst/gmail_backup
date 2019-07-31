@@ -24,10 +24,10 @@ func init() {
 
 var app *App
 
-func initApp() {
+func initApp() { 
 	err := config.Load(configFile)
 	if err != nil {
-		log.Errorf("Cannot load config: %v", err)
+		log.Errorf("Cannot load config : %v", err)
 		os.Exit(1)
 	}
 
