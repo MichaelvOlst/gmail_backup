@@ -1,5 +1,10 @@
 let mix = require('laravel-mix');
 
+mix.config.webpackConfig.output = {
+    chunkFilename: 'public/js/[name].js',
+    publicPath: 'public/',
+};
+
 mix.js('resources/js/app.js', 'public/js/');
 
 // Full API

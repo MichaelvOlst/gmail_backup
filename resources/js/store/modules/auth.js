@@ -7,7 +7,6 @@ import {
 import axios from 'axios';
 
 const state = {
-  errors: null,
   isAuthenticated: false
 };
 
@@ -20,38 +19,46 @@ const getters = {
 const actions = {
   [LOGIN]({commit}, data) {
     return new Promise(resolve => {
-      console.log(data);
       axios.post('/auth/login', data)
         .then(({data}) => {
-          commit('auth_success')
+          commit('authLogin')
           resolve(data)
         })
         .catch( () => {
-          commit('auth_error')
+          commit('authError')
         })
     });
   },
-  [LOGOUT](context) {
-    // context.commit(PURGE_AUTH);
+  [LOGOUT]({commit}) {
+    return new Promise(resolve => {
+      axios.post('/auth/logout')
+        .then(({data}) => {
+          commit('authLogout')
+          resolve(data)
+        })
+        .catch( () => {
+          commit('authError')
+        })
+    });
   },
  
   [CHECK_AUTH]({commit}) {    
     return new Promise((resolve, reject) => {
       // commit('auth_request')
       axios.get('/auth/session')
-        .then(response => {          
+        .then(response => {
           if(response.data.result === false) {
-            commit('auth_error')
+            commit('authError')
             reject(response)
             return
           }
 
           localStorage.setItem('loggedIn', true)
           resolve(response)
-          commit('auth_success')
+          commit('authLogin')
         })
         .catch(err => {
-          commit('auth_error')
+          commit('authError')
           localStorage.removeItem('loggedIn')
           reject(err)
         })
@@ -61,13 +68,16 @@ const actions = {
 
 const mutations = {
 
-  auth_succes(state) {
-    state.isAuthenticated = true;
+  authLogin(state) {
+    state.isAuthenticated = true
   },
 
-  auth_error(state) {
-    state.isAuthenticated = false;
-    state.errors = {};
+  authLogout(state) {
+    state.isAuthenticated = false
+  },
+
+  authError(state) {
+    state.isAuthenticated = false
   }
 };
 

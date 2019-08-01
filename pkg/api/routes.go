@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -17,31 +15,24 @@ func (a *API) Routes() *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(a.config.Server.Secret))))
 
-	// indexFile, err := a.box.FindString("index.html")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// appJS, err := a.box.FindString("/public/js/app.js")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
 	e.GET("/*", func(c echo.Context) error {
 		// filename := c.Request().RequestURI
-		b, err := a.box.Find("index.html")
-		if err != nil {
-			return err
-		}
-		return c.Blob(http.StatusOK, "text/html", b)
+		// b, err := a.box.Find("index.html")
+		// if err != nil {
+		// 	return err
+		// }
+		// return c.Blob(http.StatusOK, "text/html", b)
+		return c.File("public/index.html")
 	})
 
 	e.GET("/js/app.js", func(c echo.Context) error {
 		// filename := c.Request().RequestURI
-		b, err := a.box.Find("js/app.js")
-		if err != nil {
-			return err
-		}
-		return c.Blob(http.StatusOK, "text/javascript", b)
+		// b, err := a.box.Find("js/app.js")
+		// if err != nil {
+		// 	return err
+		// }
+		// return c.Blob(http.StatusOK, "text/javascript", b)
+		return c.File("public/js/app.js")
 	})
 
 	// e.File("/", indexFile)

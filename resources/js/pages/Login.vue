@@ -2,10 +2,10 @@
   <div>
     <v-card class="elevation-12">
       <v-card-text>
-        <v-form>
+        <v-form @keyup.enter.prevent="login()">
           <v-text-field
-            label="Login"
-            name="login"
+            label="Email"
+            name="email"
             prepend-icon="person"
             type="text"
             v-model="form.email"
@@ -22,8 +22,7 @@
         </v-form>
       </v-card-text>
       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click.prevent="login()">Login</v-btn>
+        <v-btn class="ml-2" color="primary" @click.prevent="login()">Login</v-btn>
       </v-card-actions>
     </v-card>
   </div>
@@ -44,9 +43,11 @@
 
     methods: {
       login() {
-        this.$store
-        .dispatch(LOGIN, this.form)
-        .then(() => this.$router.push({ name: "dashboard" }));
+        this.$store.dispatch(LOGIN, this.form)
+          .then(()=>{
+            let redirect = this.$route.query.redirect
+            this.$router.push({ path: redirect})
+          })
       }
     }
   }
