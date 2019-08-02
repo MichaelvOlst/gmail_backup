@@ -1,56 +1,38 @@
 package api
 
 import (
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // Routes starts the server
-func (a *API) Routes() *echo.Echo {
-	e := echo.New()
+func (a *API) Routes() *mux.Router {
+	r := mux.NewRouter()
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte(a.config.Server.Secret))))
+	r.Handle("/auth/login", HandlerFunc(a.HandlerLogin)).Methods(http.MethodPost)
+	r.Handle("/auth/logout", HandlerFunc(a.HandlerLogout)).Methods(http.MethodPost)
+	r.Handle("/auth/session", HandlerFunc(a.HandlerSession)).Methods(http.MethodGet)
 
-	e.GET("/*", func(c echo.Context) error {
-		// filename := c.Request().RequestURI
-		// b, err := a.box.Find("index.html")
-		// if err != nil {
-		// 	return err
-		// }
-		// return c.Blob(http.StatusOK, "text/html", b)
-		return c.File("public/index.html")
-	})
+	r.Handle("/api/accounts", a.Authorize(HandlerFunc(a.HandlerGetAllAccounts))).Methods(http.MethodGet)
+	r.Handle("/api/accounts/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerGetSingleAccount))).Methods(http.MethodGet)
+	r.Handle("/api/accounts", a.Authorize(HandlerFunc(a.HandlerCreateAccount))).Methods(http.MethodPost)
+	r.Handle("/api/sites/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerUpdateAccount))).Methods(http.MethodPatch)
+	r.Handle("/api/sites/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerDeleteAccount))).Methods(http.MethodDelete)
 
-	e.GET("/js/app.js", func(c echo.Context) error {
-		// filename := c.Request().RequestURI
-		// b, err := a.box.Find("js/app.js")
-		// if err != nil {
-		// 	return err
-		// }
-		// return c.Blob(http.StatusOK, "text/javascript", b)
-		return c.File("public/js/app.js")
-	})
+	r.Path("/").Handler(a.ServeFileHandler("index.html"))
+	r.Path("/index.html").Handler(a.ServeFileHandler("index.html"))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(a.box)))
+	r.NotFoundHandler = a.NotFoundHandler()
 
-	// e.File("/", indexFile)
-	// e.File("/js/app.js", appJS)
+	return r
 
-	e.POST("/auth/login", a.LoginHandler)
-	e.POST("/auth/logout", a.LogoutHandler)
-	e.GET("/auth/session", a.SessionHandler)
+	// api.GET("/accounts", a.GetAccountsHandler)
+	// // api.GET("/account/:id/backup", a.BackupAccount)
+	// api.POST("/account", a.CreateAccountHandler)
+	// api.PATCH("/account/:id", a.UpdateAccountHandler)
+	// api.DELETE("/account/:id", a.DeleteAccountHandler)
 
-	api := e.Group("/api")
-	api.Use(a.apiMiddleware)
-
-	api.GET("/accounts", a.GetAccountsHandler)
-	// api.GET("/account/:id/backup", a.BackupAccount)
-	api.POST("/account", a.CreateAccountHandler)
-	api.PATCH("/account/:id", a.UpdateAccountHandler)
-	api.DELETE("/account/:id", a.DeleteAccountHandler)
-
-	// e.File("/*", indexFile)
-	return e
+	// // e.File("/*", indexFile)
+	// return e
 }

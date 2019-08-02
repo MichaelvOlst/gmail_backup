@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"gmail_backup/pkg/api"
+	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gobuffalo/packr"
@@ -20,26 +23,35 @@ var serveCmd = &cobra.Command{
 	Short: "Starts the server",
 	Run: func(cmd *cobra.Command, args []string) {
 
+		addr := fmt.Sprintf("%s:%s", app.config.Server.Host, app.config.Server.Port)
+		fmt.Printf("Running app on http://%s\n", addr)
+
 		box := packr.NewBox("./../public")
-		a := api.New(app.config, app.db, &box)
-		e := a.Routes()
+		api := api.New(app.config, app.db, &box)
 
-		address := app.config.Server.Host + ":" + app.config.Server.Port
-
-		go func(address string) {
-			if err := e.Start(address); err != nil {
-				e.Logger.Info("shutting down the server")
-			}
-		}(address)
-
-		quit := make(chan os.Signal)
-		signal.Notify(quit, os.Interrupt)
-		<-quit
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		if err := e.Shutdown(ctx); err != nil {
-			e.Logger.Fatalf("Shutting down server: %v\n", err)
+		server := &http.Server{
+			Addr:         addr,
+			Handler:      api.Routes(),
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
 		}
 
+		go func() {
+			if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				fmt.Printf("listen: %s\n", err)
+			}
+		}()
+
+		quit := make(chan os.Signal)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
+
+		fmt.Println("Shutting down..")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := server.Shutdown(ctx); err != nil {
+			fmt.Printf("Could not shutdown the server %s", err)
+		}
 	},
 }

@@ -1,13 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
 	"github.com/asdine/storm"
-	"github.com/labstack/echo/v4"
-
-	"github.com/labstack/echo-contrib/session"
 )
 
 type login struct {
@@ -19,13 +17,11 @@ func (l *login) Sanitize() {
 	l.Email = strings.ToLower(strings.TrimSpace(l.Email))
 }
 
-// LoginHandler starts the server
-func (a *API) LoginHandler(c echo.Context) error {
-	// res := c.Request().Body
-	// fmt.Printf("%v\n", res)
-	// fmt.Println("")
+// HandlerLogin starts the server
+func (a *API) HandlerLogin(w http.ResponseWriter, r *http.Request) error {
 	var l login
-	if err := c.Bind(&l); err != nil {
+	err := json.NewDecoder(r.Body).Decode(&l)
+	if err != nil {
 		return err
 	}
 	l.Sanitize()
@@ -36,62 +32,66 @@ func (a *API) LoginHandler(c echo.Context) error {
 	}
 
 	if err == storm.ErrNotFound || u.ComparePassword(l.Password) != nil {
-		return c.JSON(http.StatusUnauthorized, envelope{Error: "invalid_credentials"})
+		return respond(w, http.StatusUnauthorized, envelope{Error: "invalid_credentials"})
 	}
 
-	// ignore error here as we want a (new) session regardless
-	session, _ := session.Get("auth", c)
+	session, _ := a.sessions.Get(r, "auth")
 	session.Values["user_id"] = u.ID
-	err = session.Save(c.Request(), c.Response())
+	err = session.Save(r, w)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: "Could not save session"})
+		return err
 	}
-	return c.JSON(http.StatusOK, envelope{Result: true})
+
+	return respond(w, http.StatusOK, envelope{Result: true})
 }
 
-// LogoutHandler starts the server
-func (a *API) LogoutHandler(c echo.Context) error {
-	session, _ := session.Get("auth", c)
+// HandlerLogout starts the server
+func (a *API) HandlerLogout(w http.ResponseWriter, r *http.Request) error {
+	session, _ := a.sessions.Get(r, "auth")
 	if !session.IsNew {
 		session.Options.MaxAge = -1
-		err := session.Save(c.Request(), c.Response())
+		err := session.Save(r, w)
 		if err != nil {
 			return err
 		}
 	}
-	return c.JSON(http.StatusOK, envelope{Result: true})
+	return respond(w, http.StatusOK, envelope{Result: true})
 }
 
-// SessionHandler starts the server
-func (a *API) SessionHandler(c echo.Context) error {
-	session, _ := session.Get("auth", c)
+// HandlerSession checks if the user is still logged in
+func (a *API) HandlerSession(w http.ResponseWriter, r *http.Request) error {
+
+	session, _ := a.sessions.Get(r, "auth")
 	if !session.IsNew {
-		return c.JSON(http.StatusOK, envelope{Result: true})
+		return respond(w, http.StatusOK, envelope{Result: true})
 	}
 
-	return c.JSON(http.StatusOK, envelope{Result: false})
+	return respond(w, http.StatusOK, envelope{Result: false})
 }
 
-// apiMiddleware middleware adds a `Server` header to the response.
-func (a *API) apiMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+// Authorize is middleware that aborts the request if unauthorized
+func (a *API) Authorize(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		session, err := session.Get("auth", c)
+		session, err := a.sessions.Get(r, "auth")
 		// an err is returned if cookie has been tampered with, so check that
 		if err != nil {
-			return echo.NewHTTPError(http.StatusUnauthorized, envelope{Error: "unauthorized"})
+			respond(w, http.StatusUnauthorized, envelope{Error: "unauthorized"})
+			return
 		}
 
 		userID, ok := session.Values["user_id"]
 		if session.IsNew || !ok {
-			return echo.NewHTTPError(http.StatusUnauthorized, envelope{Error: "unauthorized"})
+			respond(w, http.StatusUnauthorized, envelope{Error: "unauthorized"})
+			return
 		}
 
 		// validate user ID in session
 		if _, err := a.db.GetUserByID(userID.(int)); err != nil {
-			return echo.NewHTTPError(http.StatusUnauthorized, envelope{Error: "unauthorized"})
+			respond(w, http.StatusUnauthorized, envelope{Error: "unauthorized"})
+			return
 		}
 
-		return next(c)
-	}
+		next.ServeHTTP(w, r)
+	})
 }

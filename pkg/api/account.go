@@ -8,84 +8,119 @@ import (
 	"time"
 
 	"github.com/asdine/storm"
+	"github.com/gorilla/mux"
+
 	"github.com/labstack/echo/v4"
 )
 
-// GetAccountsHandler Gets all accounts
-func (a *API) GetAccountsHandler(c echo.Context) error {
+// HandlerGetAllAccounts Gets all accounts
+func (a *API) HandlerGetAllAccounts(w http.ResponseWriter, r *http.Request) error {
 	var accounts []models.Account
 	err := a.db.All(&accounts)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
-	return c.JSON(http.StatusOK, envelope{Result: accounts})
+	return respond(w, http.StatusOK, envelope{Result: accounts})
 }
 
-// CreateAccountHandler Creates an account
-func (a *API) CreateAccountHandler(c echo.Context) error {
+// HandlerGetSingleAccount Gets all accounts
+func (a *API) HandlerGetSingleAccount(w http.ResponseWriter, r *http.Request) error {
+	vars := mux.Vars(r)
+	aid, ok := vars["id"]
+	if !ok {
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Id not valid"})
+	}
+	id, _ := strconv.Atoi(aid)
+
+	ac, err := a.db.GetAccountByID(id)
+	if err != nil && err != storm.ErrNotFound {
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
+	}
+
+	if err == storm.ErrNotFound {
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Account not found"})
+	}
+
+	return respond(w, http.StatusOK, envelope{Result: ac})
+}
+
+// HandlerCreateAccount Creates an account
+func (a *API) HandlerCreateAccount(w http.ResponseWriter, r *http.Request) error {
 	var ac models.Account
-	if err := c.Bind(&ac); err != nil {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+	err := json.NewDecoder(r.Body).Decode(&ac)
+	if err != nil {
+		return err
 	}
 
 	na, err := a.db.CreateAccount(&ac)
 	if err != nil && err != storm.ErrAlreadyExists {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
 	if err == storm.ErrAlreadyExists {
-		return c.JSON(http.StatusUnprocessableEntity, envelope{Error: "Account already exists"})
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Account already exists"})
 	}
 
-	return c.JSON(http.StatusOK, envelope{Result: na})
+	return respond(w, http.StatusOK, envelope{Result: na})
 }
 
-// UpdateAccountHandler Updates an account
-func (a *API) UpdateAccountHandler(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
+// HandlerUpdateAccount Updates an account
+func (a *API) HandlerUpdateAccount(w http.ResponseWriter, r *http.Request) error {
+	vars := mux.Vars(r)
+	aid, ok := vars["id"]
+	if !ok {
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Id not valid"})
+	}
+	id, _ := strconv.Atoi(aid)
 
 	ac, err := a.db.GetAccountByID(id)
 	if err != nil && err != storm.ErrNotFound {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
 	if err == storm.ErrNotFound {
-		return c.JSON(http.StatusUnprocessableEntity, envelope{Error: "Account not found"})
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Account not found"})
 	}
 
 	var uc models.Account
-	if err := c.Bind(&uc); err != nil {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+	err = json.NewDecoder(r.Body).Decode(&uc)
+	if err != nil {
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
 	uc.ID = ac.ID
 	nc, err := a.db.UpdateAccount(&uc)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
-	return c.JSON(http.StatusOK, envelope{Result: nc})
+	return respond(w, http.StatusOK, envelope{Result: nc})
 }
 
-// DeleteAccountHandler Deletes an account
-func (a *API) DeleteAccountHandler(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
+// HandlerDeleteAccount Deletes an account
+func (a *API) HandlerDeleteAccount(w http.ResponseWriter, r *http.Request) error {
+	vars := mux.Vars(r)
+	aid, ok := vars["id"]
+	if !ok {
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Id not valid"})
+	}
+	id, _ := strconv.Atoi(aid)
 
 	ac, err := a.db.GetAccountByID(id)
 	if err != nil && err != storm.ErrNotFound {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
 	if err == storm.ErrNotFound {
-		return c.JSON(http.StatusUnprocessableEntity, envelope{Error: "Account not found"})
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Account not found"})
 	}
 
 	err = a.db.DeleteAccount(ac)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, envelope{Error: err})
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
-	return c.JSON(http.StatusNoContent, nil)
+	return respond(w, http.StatusNoContent, nil)
 }
 
 // BackupAccount backing up an account
