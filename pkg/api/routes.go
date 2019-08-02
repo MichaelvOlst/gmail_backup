@@ -20,19 +20,13 @@ func (a *API) Routes() *mux.Router {
 	r.Handle("/api/sites/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerUpdateAccount))).Methods(http.MethodPatch)
 	r.Handle("/api/sites/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerDeleteAccount))).Methods(http.MethodDelete)
 
+	spa := spaHandler{staticPath: "public/", indexPath: "index.html", box: a.box}
+	r.PathPrefix("/").Handler(spa)
+
 	r.Path("/").Handler(a.ServeFileHandler("index.html"))
-	r.Path("/index.html").Handler(a.ServeFileHandler("index.html"))
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(a.box)))
+	// r.Path("/index.html").Handler(a.ServeFileHandler("index.html"))
+	// r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(a.box)))
 	r.NotFoundHandler = a.NotFoundHandler()
 
 	return r
-
-	// api.GET("/accounts", a.GetAccountsHandler)
-	// // api.GET("/account/:id/backup", a.BackupAccount)
-	// api.POST("/account", a.CreateAccountHandler)
-	// api.PATCH("/account/:id", a.UpdateAccountHandler)
-	// api.DELETE("/account/:id", a.DeleteAccountHandler)
-
-	// // e.File("/*", indexFile)
-	// return e
 }
