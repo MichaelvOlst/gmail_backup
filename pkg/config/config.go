@@ -21,6 +21,9 @@ type Config struct {
 	Database struct {
 		Filename string `default:"gmail_backup.db"`
 	}
+	Google struct {
+		File string `default:"credentials.json"`
+	}
 }
 
 // Load loads the config file

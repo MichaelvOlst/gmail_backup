@@ -7,7 +7,7 @@
   >
     <template v-slot:top>
       <v-toolbar flat color="white">
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-dialog v-model="dialog" max-width="1000px">
           <template v-slot:activator="{ on }">
             <v-btn color="primary" dark class="mb-2" v-on="on">New account</v-btn>
           </template>
@@ -19,23 +19,24 @@
             <v-card-text>
               <v-container grid-list-md>
                 <v-layout wrap>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.name" label="Dessert name"></v-text-field>
+                  <v-flex xs12 sm12 md12>
+                    <v-text-field v-model="form.email" label="Emailaddress"></v-text-field>
                   </v-flex>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.calories" label="Calories"></v-text-field>
+                  <v-flex xs12 sm12 md12>
+                    <!-- 4/nQH0XkilbxhMtkm6z2fqi7lyB2I5zd7Cxq4U4kwhD5IWF8uNiPDrH-E -->
+                    <v-text-field v-model="form.encryption_key" label="Encryption key"></v-text-field>
+                      <a href="#" @click.prevent="generateKey()" target="blank">Generate key</a>
+
                   </v-flex>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.fat" label="Fat (g)"></v-text-field>
+                  <v-flex xs12 sm12 md12>
+                    <v-text-field v-model="form.accesstoken" label="Google accesstoken"></v-text-field>
+                    <a v-if="getAccessTokenURL" :href="getAccessTokenURL" target="blank">Get accesstoken</a>
                   </v-flex>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.carbs" label="Carbs (g)"></v-text-field>
-                  </v-flex>
-                  <v-flex xs12 sm6 md4>
-                    <v-text-field v-model="editedItem.protein" label="Protein (g)"></v-text-field>
+                  <v-flex xs12 sm12 md12>
+                    <v-switch v-model="form.attachments" label="Attachments"></v-switch>
                   </v-flex>
                 </v-layout>
-              </v-container>
+              </v-container>  
             </v-card-text>
 
             <v-card-actions>
@@ -48,24 +49,16 @@
       </v-toolbar>
     </template>
     <template v-slot:item.action="{ item }">
-      <v-icon
-        small
-        class="mr-2"
-        @click="editItem(item)"
-      >
-        edit
-      </v-icon>
-      <v-icon
-        small
-        @click="deleteItem(item)"
-      >
-        delete
-      </v-icon>
+      <v-icon small class="mr-2" @click="editItem(item)">edit</v-icon>
+      <v-icon small @click="deleteItem(item)">delete</v-icon>
     </template>
   </v-data-table>
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
+  import { GOOGLE_URL } from './../store/modules/types'  
+
   export default {
     data: () => ({
       dialog: false,
@@ -82,26 +75,21 @@
       ],
       accounts: [],
       editedIndex: -1,
-      editedItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0,
-      },
-      defaultItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0,
-      },
+      form: {
+        email: '',
+        encryption_key: '',
+        attachments: true,
+        accesstoken: '',
+      }
     }),
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+        return this.editedIndex === -1 ? 'New Account' : 'Edit Account'
       },
+      ...mapGetters([
+        'getAccessTokenURL',
+      ])
     },
 
     watch: {
@@ -111,10 +99,20 @@
     },
 
     created () {
-      // this.initialize()
+      this.$store.dispatch(GOOGLE_URL).then((data) => {
+        
+      })
+      .catch(()=> {
+        console.error("could not retrieve URL for google auth")
+      })
+
     },
 
     methods: {
+
+      generateKey() {
+        this.form.encryption_key =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      },
 
       editItem (item) {
         this.editedIndex = this.desserts.indexOf(item)

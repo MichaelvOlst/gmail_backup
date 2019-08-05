@@ -14,8 +14,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var googleConfigFile string
+
 func init() {
 	rootCmd.AddCommand(serveCmd)
+
+	serveCmd.Flags().StringVarP(&googleConfigFile, "google", "g", "", "Google config file")
 }
 
 var serveCmd = &cobra.Command{

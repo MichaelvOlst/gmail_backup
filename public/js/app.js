@@ -1952,6 +1952,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _store_modules_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../store/modules/types */ "./resources/js/store/modules/types.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 //
 //
 //
@@ -2009,16 +2017,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2041,35 +2041,33 @@ __webpack_require__.r(__webpack_exports__);
       }],
       accounts: [],
       editedIndex: -1,
-      editedItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0
-      },
-      defaultItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0
+      form: {
+        email: '',
+        encryption_key: '',
+        attachments: true,
+        accesstoken: ''
       }
     };
   },
-  computed: {
+  computed: _objectSpread({
     formTitle: function formTitle() {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item';
+      return this.editedIndex === -1 ? 'New Account' : 'Edit Account';
     }
-  },
+  }, Object(vuex__WEBPACK_IMPORTED_MODULE_0__["mapGetters"])(['getAccessTokenURL'])),
   watch: {
     dialog: function dialog(val) {
       val || this.close();
     }
   },
-  created: function created() {// this.initialize()
+  created: function created() {
+    this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_1__["GOOGLE_URL"]).then(function (data) {})["catch"](function () {
+      console.error("could not retrieve URL for google auth");
+    });
   },
   methods: {
+    generateKey: function generateKey() {
+      this.form.encryption_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    },
     editItem: function editItem(item) {
       this.editedIndex = this.desserts.indexOf(item);
       this.editedItem = Object.assign({}, item);
@@ -3488,7 +3486,7 @@ var render = function() {
                 _c(
                   "v-dialog",
                   {
-                    attrs: { "max-width": "500px" },
+                    attrs: { "max-width": "1000px" },
                     scopedSlots: _vm._u([
                       {
                         key: "activator",
@@ -3542,20 +3540,18 @@ var render = function() {
                                   [
                                     _c(
                                       "v-flex",
-                                      { attrs: { xs12: "", sm6: "", md4: "" } },
+                                      {
+                                        attrs: { xs12: "", sm12: "", md12: "" }
+                                      },
                                       [
                                         _c("v-text-field", {
-                                          attrs: { label: "Dessert name" },
+                                          attrs: { label: "Emailaddress" },
                                           model: {
-                                            value: _vm.editedItem.name,
+                                            value: _vm.form.email,
                                             callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.editedItem,
-                                                "name",
-                                                $$v
-                                              )
+                                              _vm.$set(_vm.form, "email", $$v)
                                             },
-                                            expression: "editedItem.name"
+                                            expression: "form.email"
                                           }
                                         })
                                       ],
@@ -3564,86 +3560,102 @@ var render = function() {
                                     _vm._v(" "),
                                     _c(
                                       "v-flex",
-                                      { attrs: { xs12: "", sm6: "", md4: "" } },
+                                      {
+                                        attrs: { xs12: "", sm12: "", md12: "" }
+                                      },
                                       [
                                         _c("v-text-field", {
-                                          attrs: { label: "Calories" },
+                                          attrs: { label: "Encryption key" },
                                           model: {
-                                            value: _vm.editedItem.calories,
+                                            value: _vm.form.encryption_key,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
-                                                "calories",
+                                                _vm.form,
+                                                "encryption_key",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.calories"
+                                            expression: "form.encryption_key"
                                           }
-                                        })
+                                        }),
+                                        _vm._v(" "),
+                                        _c(
+                                          "a",
+                                          {
+                                            attrs: {
+                                              href: "#",
+                                              target: "blank"
+                                            },
+                                            on: {
+                                              click: function($event) {
+                                                $event.preventDefault()
+                                                return _vm.generateKey()
+                                              }
+                                            }
+                                          },
+                                          [_vm._v("Generate key")]
+                                        )
                                       ],
                                       1
                                     ),
                                     _vm._v(" "),
                                     _c(
                                       "v-flex",
-                                      { attrs: { xs12: "", sm6: "", md4: "" } },
+                                      {
+                                        attrs: { xs12: "", sm12: "", md12: "" }
+                                      },
                                       [
                                         _c("v-text-field", {
-                                          attrs: { label: "Fat (g)" },
+                                          attrs: {
+                                            label: "Google accesstoken"
+                                          },
                                           model: {
-                                            value: _vm.editedItem.fat,
+                                            value: _vm.form.accesstoken,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
-                                                "fat",
+                                                _vm.form,
+                                                "accesstoken",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.fat"
+                                            expression: "form.accesstoken"
                                           }
-                                        })
+                                        }),
+                                        _vm._v(" "),
+                                        _vm.getAccessTokenURL
+                                          ? _c(
+                                              "a",
+                                              {
+                                                attrs: {
+                                                  href: _vm.getAccessTokenURL,
+                                                  target: "blank"
+                                                }
+                                              },
+                                              [_vm._v("Get accesstoken")]
+                                            )
+                                          : _vm._e()
                                       ],
                                       1
                                     ),
                                     _vm._v(" "),
                                     _c(
                                       "v-flex",
-                                      { attrs: { xs12: "", sm6: "", md4: "" } },
+                                      {
+                                        attrs: { xs12: "", sm12: "", md12: "" }
+                                      },
                                       [
-                                        _c("v-text-field", {
-                                          attrs: { label: "Carbs (g)" },
+                                        _c("v-switch", {
+                                          attrs: { label: "Attachments" },
                                           model: {
-                                            value: _vm.editedItem.carbs,
+                                            value: _vm.form.attachments,
                                             callback: function($$v) {
                                               _vm.$set(
-                                                _vm.editedItem,
-                                                "carbs",
+                                                _vm.form,
+                                                "attachments",
                                                 $$v
                                               )
                                             },
-                                            expression: "editedItem.carbs"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      { attrs: { xs12: "", sm6: "", md4: "" } },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: { label: "Protein (g)" },
-                                          model: {
-                                            value: _vm.editedItem.protein,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.editedItem,
-                                                "protein",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "editedItem.protein"
+                                            expression: "form.attachments"
                                           }
                                         })
                                       ],
@@ -3713,7 +3725,7 @@ var render = function() {
                   }
                 }
               },
-              [_vm._v("\n      edit\n    ")]
+              [_vm._v("edit")]
             ),
             _vm._v(" "),
             _c(
@@ -3726,7 +3738,7 @@ var render = function() {
                   }
                 }
               },
-              [_vm._v("\n      delete\n    ")]
+              [_vm._v("delete")]
             )
           ]
         }
@@ -56438,15 +56450,73 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _modules_auth__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/auth */ "./resources/js/store/modules/auth.js");
+/* harmony import */ var _modules_accounts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/accounts */ "./resources/js/store/modules/accounts.js");
+
 
 
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__["default"]);
 /* harmony default export */ __webpack_exports__["default"] = (new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
   modules: {
-    auth: _modules_auth__WEBPACK_IMPORTED_MODULE_2__["default"]
+    auth: _modules_auth__WEBPACK_IMPORTED_MODULE_2__["default"],
+    accounts: _modules_accounts__WEBPACK_IMPORTED_MODULE_3__["default"]
   }
 }));
+
+/***/ }),
+
+/***/ "./resources/js/store/modules/accounts.js":
+/*!************************************************!*\
+  !*** ./resources/js/store/modules/accounts.js ***!
+  \************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./types */ "./resources/js/store/modules/types.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+var state = {
+  accessTokenURL: ""
+};
+var getters = {
+  getAccessTokenURL: function getAccessTokenURL(state) {
+    return state.accessTokenURL;
+  }
+};
+
+var actions = _defineProperty({}, _types__WEBPACK_IMPORTED_MODULE_0__["GOOGLE_URL"], function (_ref) {
+  var commit = _ref.commit;
+  return new Promise(function (resolve) {
+    axios__WEBPACK_IMPORTED_MODULE_1___default.a.get('/api/google-url').then(function (_ref2) {
+      var data = _ref2.data;
+      commit('accesstoken_url', data.result);
+      resolve(data);
+    })["catch"](function () {
+      commit('accesstoken_error');
+    });
+  });
+});
+
+var mutations = {
+  accesstoken_url: function accesstoken_url(state, url) {
+    state.accessTokenURL = url;
+  },
+  accesstoken_error: function accesstoken_error(state) {
+    state.accessTokenURL = "";
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  state: state,
+  actions: actions,
+  mutations: mutations,
+  getters: getters
+});
 
 /***/ }),
 
@@ -56544,7 +56614,7 @@ var mutations = {
 /*!*********************************************!*\
   !*** ./resources/js/store/modules/types.js ***!
   \*********************************************/
-/*! exports provided: CHECK_AUTH, LOGIN, LOGOUT */
+/*! exports provided: CHECK_AUTH, LOGIN, LOGOUT, GOOGLE_URL */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -56552,9 +56622,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CHECK_AUTH", function() { return CHECK_AUTH; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LOGIN", function() { return LOGIN; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LOGOUT", function() { return LOGOUT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GOOGLE_URL", function() { return GOOGLE_URL; });
 var CHECK_AUTH = "checkAuth";
 var LOGIN = "login";
 var LOGOUT = "logout";
+var GOOGLE_URL = "googleURL";
 
 /***/ }),
 

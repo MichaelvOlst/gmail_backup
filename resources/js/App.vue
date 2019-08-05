@@ -61,7 +61,6 @@
     name: "App",
 
     computed: {
-      // mix the getters into computed with object spread operator
       ...mapGetters([
         'isAuthenticated',
       ])
