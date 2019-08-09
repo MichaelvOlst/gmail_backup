@@ -10,6 +10,7 @@ import (
 	"github.com/asdine/storm"
 	"github.com/gorilla/mux"
 
+	"github.com/gobuffalo/validate"
 	"github.com/labstack/echo/v4"
 )
 
@@ -47,11 +48,20 @@ func (a *API) HandlerGetSingleAccount(w http.ResponseWriter, r *http.Request) er
 // HandlerCreateAccount Creates an account
 func (a *API) HandlerCreateAccount(w http.ResponseWriter, r *http.Request) error {
 	var ac models.Account
-
 	err := json.NewDecoder(r.Body).Decode(&ac)
 	if err != nil {
 		return err
 	}
+
+	validateErrors := validate.Validate(&ac)
+	if len(validateErrors.Errors) != 0 {
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: validateErrors.Errors})
+	}
+
+	// v := validate.Struct(ac)
+	// if !v.Validate() {
+	// 	return respond(w, http.StatusUnprocessableEntity, envelope{Error: v.})
+	// }
 
 	na, err := a.db.CreateAccount(&ac)
 	if err != nil && err != storm.ErrAlreadyExists {
