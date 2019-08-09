@@ -29,7 +29,8 @@
 </template>
 
 <script>
-  import { LOGIN } from './../store/modules/types';
+  import { mapGetters } from 'vuex'
+  import { LOGIN, CHECK_AUTH } from './../store/modules/types';
 
   export default {
     data () {
@@ -41,11 +42,19 @@
       }
     },
 
+    created () {
+      this.$store.dispatch(CHECK_AUTH)
+      .then( () => {
+        this.$router.push({ name: "dashboard"})
+      })
+      .catch(() => { })      
+    },
+
     methods: {
       login() {
         this.$store.dispatch(LOGIN, this.form)
           .then(()=>{
-            let redirect = this.$route.query.redirect
+            let redirect = this.$route.query.redirect || "dashboard"
             this.$router.push({ path: redirect})
           })
       }

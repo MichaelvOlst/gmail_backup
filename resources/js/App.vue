@@ -22,9 +22,9 @@
             </v-list-item-action>
             <v-list-item-title>Settings</v-list-item-title>
         </v-list-item>
-        <v-list-item v-if="isAuthenticated" @click.prevent="logout()">
+        <v-list-item v-if="isAuthenticated" @click.prevent="logout()" class="logout_button">
             <v-list-item-action>
-            <v-icon>settings</v-icon>
+            <v-icon>logout</v-icon>
             </v-list-item-action>
             <v-list-item-title>Logout</v-list-item-title>
         </v-list-item>
@@ -54,7 +54,7 @@
 
 
 <script>
-  import { mapGetters, mapActions } from 'vuex'
+  import { mapGetters } from 'vuex'
   import { LOGOUT } from './store/modules/types'  
 
   export default {
@@ -68,6 +68,10 @@
 
     methods: {
      logout() {
+        if(!confirm("Are you sure?")) {
+          return
+        }
+
         this.$store.dispatch(LOGOUT).then(() => {
           this.$router.push({ name: "login" });
         });
@@ -76,3 +80,11 @@
     }
   }
 </script>
+
+<style scoped>
+  .logout_button {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
+</style>
