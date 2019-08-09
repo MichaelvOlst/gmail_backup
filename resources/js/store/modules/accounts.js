@@ -1,8 +1,9 @@
-import {GOOGLE_URL} from './types';
+import {GOOGLE_URL, SAVE_ACCOUNT} from './types';
 import axios from 'axios';
 
 const state = {
-    accessTokenURL: ""
+    accessTokenURL: "",
+    accounts: []
 };
 
 const getters = {
@@ -24,6 +25,19 @@ const actions = {
                 })
         });
     },
+
+    [SAVE_ACCOUNT]({commit}, data) {
+        return new Promise(resolve => {
+            axios.post('/api/accounts', data)
+                .then(({ data }) => {                                        
+                    commit('account_saved', data.result)
+                    resolve(data)
+                })
+                .catch((error) => {
+                    commit('account_error', error)
+                })
+        });
+    }
     
 };
 
@@ -36,6 +50,14 @@ const mutations = {
     accesstoken_error(state) {
         state.accessTokenURL = ""
     },
+
+    account_saved(state, account) {
+        state.accounts = [...state.accounts, account];
+    },
+
+    account_error(state, error) {
+        console.log(error)
+    }
 };
 
 export default {

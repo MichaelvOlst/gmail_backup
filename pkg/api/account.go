@@ -47,6 +47,7 @@ func (a *API) HandlerGetSingleAccount(w http.ResponseWriter, r *http.Request) er
 // HandlerCreateAccount Creates an account
 func (a *API) HandlerCreateAccount(w http.ResponseWriter, r *http.Request) error {
 	var ac models.Account
+
 	err := json.NewDecoder(r.Body).Decode(&ac)
 	if err != nil {
 		return err

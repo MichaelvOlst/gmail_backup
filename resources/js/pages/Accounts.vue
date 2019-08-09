@@ -57,7 +57,8 @@
 
 <script>
   import { mapGetters } from 'vuex'
-  import { GOOGLE_URL } from './../store/modules/types'  
+  import { GOOGLE_URL, SAVE_ACCOUNT } from './../store/modules/types'  
+import { log } from 'util';
 
   export default {
     data: () => ({
@@ -134,12 +135,23 @@
       },
 
       save () {
-        if (this.editedIndex > -1) {
-          Object.assign(this.desserts[this.editedIndex], this.editedItem)
-        } else {
-          this.desserts.push(this.editedItem)
-        }
-        this.close()
+        // 4/nQEUsvKX0-noc9vEX8etI9yKovADVLnb6RE0gYnSsauBxd9QWEOFuZQ
+        // console.log(this.form);
+        
+        this.$store.dispatch(SAVE_ACCOUNT, this.form)
+          .then((data) => {
+            console.log(data);
+            
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+        // if (this.editedIndex > -1) {
+        //   Object.assign(this.desserts[this.editedIndex], this.editedItem)
+        // } else {
+        //   this.desserts.push(this.editedItem)
+        // }
+        // this.close()
       },
     },
   }
