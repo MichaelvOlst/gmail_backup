@@ -5,6 +5,13 @@
     no-data-text="No accounts have been created yet"
     class="elevation-1"
   >
+
+    <template v-slot:item.attachments="{ item }">
+      <v-icon v-if="item.attachments">done</v-icon>
+      <v-icon v-else>clear</v-icon>
+
+    </template>
+
     <template v-slot:top>
       <v-toolbar flat color="white">
         <v-dialog v-model="dialog" max-width="1000px">
@@ -23,10 +30,8 @@
                     <v-text-field v-model="form.email" label="Emailaddress"></v-text-field>
                   </v-flex>
                   <v-flex xs12 sm12 md12>
-                    <!-- 4/nQH0XkilbxhMtkm6z2fqi7lyB2I5zd7Cxq4U4kwhD5IWF8uNiPDrH-E -->
                     <v-text-field v-model="form.encryption_key" label="Encryption key"></v-text-field>
                       <a href="#" @click.prevent="generateKey()" target="blank">Generate key</a>
-
                   </v-flex>
                   <v-flex xs12 sm12 md12>
                     <v-text-field v-model="form.accesstoken" label="Google accesstoken"></v-text-field>
@@ -56,9 +61,9 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import { GOOGLE_URL, SAVE_ACCOUNT } from './../store/modules/types'  
-import { log } from 'util';
+  import { mapGetters, mapState } from 'vuex'
+  import { GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT } from './../store/modules/types'  
+  import { log } from 'util';
 
   export default {
     data: () => ({
@@ -70,12 +75,11 @@ import { log } from 'util';
           sortable: true,
           value: 'email',
         },
+        { text: 'Attachments', value: 'attachments' },
         { text: 'Last date', value: 'backup_date' },
         { text: 'percentage', value: 'percentage' },
         { text: 'Actions', value: 'action', sortable: false },
       ],
-      accounts: [],
-      editedIndex: -1,
       form: {
         email: '',
         encryption_key: '',
@@ -86,11 +90,14 @@ import { log } from 'util';
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'New Account' : 'Edit Account'
+        return this.form.id ? 'Edit Account' : 'New Account'
       },
       ...mapGetters([
         'getAccessTokenURL',
-      ])
+      ]),
+      ...mapState({
+        accounts: state => state.accounts.accounts,
+      }),
     },
 
     watch: {
@@ -99,14 +106,15 @@ import { log } from 'util';
       },
     },
 
-    created () {
-      this.$store.dispatch(GOOGLE_URL).then((data) => {
-        
-      })
-      .catch(()=> {
-        console.error("could not retrieve URL for google auth")
-      })
+    async created () {
 
+      try {
+        let response = this.$store.dispatch(GOOGLE_URL)  
+      } catch (e) {
+        console.log(e);
+      }
+
+      this.getAllAccounts()
     },
 
     methods: {
@@ -115,43 +123,51 @@ import { log } from 'util';
         this.form.encryption_key =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       },
 
-      editItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.dialog = true
+      async getAllAccounts() {
+        try {
+          let response = this.$store.dispatch(ALL_ACCOUNTS)
+        } catch (e) {
+          console.log(e);
+        }
       },
 
-      deleteItem (item) {
-        const index = this.desserts.indexOf(item)
-        confirm('Are you sure you want to delete this item?') && this.desserts.splice(index, 1)
+      async editItem (item) {
+        try {
+          let response = await this.$store.dispatch(GET_ACCOUNT, item.id)
+          this.form = response;
+          this.dialog = true
+        } catch (e) {
+          console.log(e.error);          
+        }
+      },
+
+      async deleteItem (item) {
+        if(!confirm("Are you sure?")) {
+          return
+        }
+
+        try {
+          let response = await this.$store.dispatch(DELETE_ACCOUNT, item.id)
+          this.getAllAccounts()
+        } catch (e) {
+          console.log(e);
+        }
       },
 
       close () {
         this.dialog = false
-        setTimeout(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        }, 300)
+        this.form = {}
       },
 
-      save () {
-        // 4/nQEUsvKX0-noc9vEX8etI9yKovADVLnb6RE0gYnSsauBxd9QWEOFuZQ
-        // console.log(this.form);
-        
-        this.$store.dispatch(SAVE_ACCOUNT, this.form)
-          .then((data) => {
-            console.log(data);
-            
-          })
-          .catch((error) => {
-            console.log(error)
-          })
-        // if (this.editedIndex > -1) {
-        //   Object.assign(this.desserts[this.editedIndex], this.editedItem)
-        // } else {
-        //   this.desserts.push(this.editedItem)
-        // }
-        // this.close()
+      async save () {
+        try {
+          let response = await this.$store.dispatch(SAVE_ACCOUNT, this.form)
+          this.form = {}
+          this.close();
+          this.getAllAccounts()
+        } catch(e) {
+          alert(e.error)         
+        }
       },
     },
   }
