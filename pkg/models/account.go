@@ -2,9 +2,8 @@ package models
 
 import (
 	"regexp"
+	"strings"
 	"time"
-
-	"github.com/gobuffalo/validate"
 )
 
 // Account ...
@@ -15,25 +14,29 @@ type Account struct {
 	Attachments    bool      `json:"attachments"`
 	BackupComplete bool      `json:"backup_complete"`
 	BackupDate     time.Time `json:"backup_date"`
-	AccessToken    string    `json:"accesstoken" `
+	GoogleToken    string    `json:"google_token" `
 }
 
-// IsValid validates the struct attributes
-func (a *Account) IsValid(errors *validate.Errors) {
-	if a.EncryptionKey == "" {
-		errors.Add("encryption_key", "Encyption key must not be blank")
+// Validate the account model
+func (a *Account) Validate() map[string]string {
+	var v = make(map[string]string)
+
+	if strings.TrimSpace(a.EncryptionKey) == "" {
+		v["encryption_key"] = "Encyption key is required"
 	}
 
-	if a.Email == "" {
-		errors.Add("email", "Email must not be blank")
+	if strings.TrimSpace(a.GoogleToken) == "" {
+		v["google_token"] = "Google token is required"
 	}
 
-	var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	if !rxEmail.MatchString(a.Email) {
-		errors.Add("email", "Enter a valid email")
+	if strings.TrimSpace(a.Email) == "" {
+		v["email"] = "Email is required"
+	} else {
+		var rxEmail = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+		if !rxEmail.MatchString(a.Email) {
+			v["email"] = "Enter an valid email"
+		}
 	}
 
-	if a.AccessToken == "" {
-		errors.Add("accesstoken", "Access token must not be blank")
-	}
+	return v
 }

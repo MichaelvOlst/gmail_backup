@@ -27,15 +27,15 @@
               <v-container grid-list-md>
                 <v-layout wrap>
                   <v-flex xs12 sm12 md12>
-                    <v-text-field v-model="form.email" label="Emailaddress"></v-text-field>
+                    <v-text-field v-model="form.email" :error="errors.email !== null" :error-messages="errors.email" label="Emailaddress" required></v-text-field>
                   </v-flex>
                   <v-flex xs12 sm12 md12>
-                    <v-text-field v-model="form.encryption_key" label="Encryption key"></v-text-field>
-                      <a href="#" @click.prevent="generateKey()" target="blank">Generate key</a>
+                    <v-text-field v-model="form.encryption_key" :error="errors.encryption_key !== null" :error-messages="errors.encryption_key" label="Encryption key" required></v-text-field>
+                    <a href="#" @click.prevent="generateKey()" target="blank">Generate key</a>
                   </v-flex>
                   <v-flex xs12 sm12 md12>
-                    <v-text-field v-model="form.accesstoken" label="Google accesstoken"></v-text-field>
-                    <a v-if="getAccessTokenURL" :href="getAccessTokenURL" target="blank">Get accesstoken</a>
+                    <v-text-field v-model="form.google_token" :error="errors.google_token !== null" :error-messages="errors.google_token" label="Google token" required></v-text-field>
+                    <a v-if="getTokenURL" :href="getTokenURL" target="blank">Get token</a>
                   </v-flex>
                   <v-flex xs12 sm12 md12>
                     <v-switch v-model="form.attachments" label="Attachments"></v-switch>
@@ -84,8 +84,13 @@
         email: '',
         encryption_key: '',
         attachments: true,
-        accesstoken: '',
-      }
+        google_token: '',
+      },
+      errors: {
+        email: null,
+        encryption_key: null,
+        google_token: null
+      },
     }),
 
     computed: {
@@ -93,7 +98,7 @@
         return this.form.id ? 'Edit Account' : 'New Account'
       },
       ...mapGetters([
-        'getAccessTokenURL',
+        'getTokenURL',
       ]),
       ...mapState({
         accounts: state => state.accounts.accounts,
@@ -104,6 +109,15 @@
       dialog (val) {
         val || this.close()
       },
+
+      form: {
+        handler (val) {
+          this.errors.email = null
+          this.errors.encryption_key = null
+          this.errors.google_token = null
+        },
+        deep: true
+      }
     },
 
     async created () {
@@ -150,7 +164,7 @@
           let response = await this.$store.dispatch(DELETE_ACCOUNT, item.id)
           this.getAllAccounts()
         } catch (e) {
-          console.log(e);
+
         }
       },
 
@@ -160,13 +174,14 @@
       },
 
       async save () {
+
         try {
           let response = await this.$store.dispatch(SAVE_ACCOUNT, this.form)
           this.form = {}
           this.close();
           this.getAllAccounts()
-        } catch(e) {
-          alert(e.error)         
+        } catch(err) {          
+          this.errors = err
         }
       },
     },

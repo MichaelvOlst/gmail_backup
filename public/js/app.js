@@ -2078,7 +2078,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         email: '',
         encryption_key: '',
         attachments: true,
-        accesstoken: ''
+        google_token: ''
+      },
+      errors: {
+        email: null,
+        encryption_key: null,
+        google_token: null
       }
     };
   },
@@ -2086,7 +2091,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     formTitle: function formTitle() {
       return this.form.id ? 'Edit Account' : 'New Account';
     }
-  }, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['getAccessTokenURL']), {}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapState"])({
+  }, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['getTokenURL']), {}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapState"])({
     accounts: function accounts(state) {
       return state.accounts.accounts;
     }
@@ -2094,6 +2099,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   watch: {
     dialog: function dialog(val) {
       val || this.close();
+    },
+    form: {
+      handler: function handler(val) {
+        this.errors.email = null;
+        this.errors.encryption_key = null;
+        this.errors.google_token = null;
+      },
+      deep: true
     }
   },
   created: function () {
@@ -2223,15 +2236,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
               case 5:
                 response = _context4.sent;
                 this.getAllAccounts();
-                _context4.next = 12;
+                _context4.next = 11;
                 break;
 
               case 9:
                 _context4.prev = 9;
                 _context4.t0 = _context4["catch"](2);
-                console.log(_context4.t0);
 
-              case 12:
+              case 11:
               case "end":
                 return _context4.stop();
             }
@@ -2273,7 +2285,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
               case 9:
                 _context5.prev = 9;
                 _context5.t0 = _context5["catch"](0);
-                alert(_context5.t0.error);
+                this.errors = _context5.t0;
 
               case 12:
               case "end":
@@ -5313,7 +5325,12 @@ var render = function() {
                                       },
                                       [
                                         _c("v-text-field", {
-                                          attrs: { label: "Emailaddress" },
+                                          attrs: {
+                                            error: _vm.errors.email !== null,
+                                            "error-messages": _vm.errors.email,
+                                            label: "Emailaddress",
+                                            required: ""
+                                          },
                                           model: {
                                             value: _vm.form.email,
                                             callback: function($$v) {
@@ -5333,7 +5350,15 @@ var render = function() {
                                       },
                                       [
                                         _c("v-text-field", {
-                                          attrs: { label: "Encryption key" },
+                                          attrs: {
+                                            error:
+                                              _vm.errors.encryption_key !==
+                                              null,
+                                            "error-messages":
+                                              _vm.errors.encryption_key,
+                                            label: "Encryption key",
+                                            required: ""
+                                          },
                                           model: {
                                             value: _vm.form.encryption_key,
                                             callback: function($$v) {
@@ -5375,31 +5400,36 @@ var render = function() {
                                       [
                                         _c("v-text-field", {
                                           attrs: {
-                                            label: "Google accesstoken"
+                                            error:
+                                              _vm.errors.google_token !== null,
+                                            "error-messages":
+                                              _vm.errors.google_token,
+                                            label: "Google token",
+                                            required: ""
                                           },
                                           model: {
-                                            value: _vm.form.accesstoken,
+                                            value: _vm.form.google_token,
                                             callback: function($$v) {
                                               _vm.$set(
                                                 _vm.form,
-                                                "accesstoken",
+                                                "google_token",
                                                 $$v
                                               )
                                             },
-                                            expression: "form.accesstoken"
+                                            expression: "form.google_token"
                                           }
                                         }),
                                         _vm._v(" "),
-                                        _vm.getAccessTokenURL
+                                        _vm.getTokenURL
                                           ? _c(
                                               "a",
                                               {
                                                 attrs: {
-                                                  href: _vm.getAccessTokenURL,
+                                                  href: _vm.getTokenURL,
                                                   target: "blank"
                                                 }
                                               },
-                                              [_vm._v("Get accesstoken")]
+                                              [_vm._v("Get token")]
                                             )
                                           : _vm._e()
                                       ],
@@ -58260,9 +58290,13 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./types */ "./resources/js/store/modules/types.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./types */ "./resources/js/store/modules/types.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+
+
 var _actions;
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -58275,77 +58309,215 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 
 
 var state = {
-  accessTokenURL: "",
-  accounts: []
+  tokenURL: null,
+  accounts: [],
+  errors: null
 };
 var getters = {
-  getAccessTokenURL: function getAccessTokenURL(state) {
-    return state.accessTokenURL;
+  getTokenURL: function getTokenURL(state) {
+    return state.tokenURL;
   }
 };
-var actions = (_actions = {}, _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_0__["GOOGLE_URL"], function (_ref) {
-  var commit = _ref.commit;
-  return new Promise(function (resolve) {
-    axios__WEBPACK_IMPORTED_MODULE_1___default.a.get('/api/google-url').then(function (_ref2) {
-      var data = _ref2.data;
-      commit('accesstoken_url', data.result);
-      resolve(data);
-    })["catch"](function () {
-      commit('accesstoken_error');
-    });
-  });
-}), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_0__["SAVE_ACCOUNT"], function (_ref3, data) {
-  var commit = _ref3.commit;
-  return new Promise(function (resolve) {
-    axios__WEBPACK_IMPORTED_MODULE_1___default.a.post('/api/accounts', data).then(function (_ref4) {
-      var data = _ref4.data;
-      commit('account_saved', data.result);
-      resolve(data);
-    })["catch"](function (error) {
-      commit('account_error', error);
-    });
-  });
-}), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_0__["ALL_ACCOUNTS"], function (_ref5, data) {
-  var commit = _ref5.commit;
-  return new Promise(function (resolve) {
-    axios__WEBPACK_IMPORTED_MODULE_1___default.a.get('/api/accounts').then(function (_ref6) {
-      var data = _ref6.data;
-      commit('account_get', data.result);
-      resolve(data);
-    })["catch"](function (error) {
-      commit('account_error', error);
-    });
-  });
-}), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_0__["GET_ACCOUNT"], function (_ref7, id) {
-  var commit = _ref7.commit;
-  return new Promise(function (resolve) {
-    axios__WEBPACK_IMPORTED_MODULE_1___default.a.get("/api/accounts/".concat(id)).then(function (_ref8) {
-      var data = _ref8.data;
-      resolve(data.result);
-    })["catch"](function (error) {
-      commit('account_error', error);
-    });
-  });
-}), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_0__["DELETE_ACCOUNT"], function (_ref9, id) {
-  var commit = _ref9.commit;
-  return new Promise(function (resolve) {
-    axios__WEBPACK_IMPORTED_MODULE_1___default.a["delete"]("/api/accounts/".concat(id)).then(function (_ref10) {
-      var data = _ref10.data;
-      resolve(data.result);
-    })["catch"](function (error) {
-      commit('account_error', error);
-    });
-  });
-}), _actions);
+var actions = (_actions = {}, _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["GOOGLE_URL"], function () {
+  var _ref2 = _asyncToGenerator(
+  /*#__PURE__*/
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(_ref) {
+    var commit, _ref3, data;
+
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            commit = _ref.commit;
+            _context.prev = 1;
+            _context.next = 4;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/api/google-url');
+
+          case 4:
+            _ref3 = _context.sent;
+            data = _ref3.data;
+            commit('google_token_url', data.result);
+            return _context.abrupt("return", data.result);
+
+          case 10:
+            _context.prev = 10;
+            _context.t0 = _context["catch"](1);
+            commit('google_token_error', _context.t0.response.data.error);
+            throw _context.t0.response.data.error;
+
+          case 14:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[1, 10]]);
+  }));
+
+  return function (_x) {
+    return _ref2.apply(this, arguments);
+  };
+}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["SAVE_ACCOUNT"], function () {
+  var _ref5 = _asyncToGenerator(
+  /*#__PURE__*/
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(_ref4, data) {
+    var commit, response;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            commit = _ref4.commit;
+            _context2.prev = 1;
+            _context2.next = 4;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.post('/api/accounts', data);
+
+          case 4:
+            response = _context2.sent;
+            commit('account_saved', response.result);
+            return _context2.abrupt("return", response);
+
+          case 9:
+            _context2.prev = 9;
+            _context2.t0 = _context2["catch"](1);
+            commit('account_error', _context2.t0.response.data.error);
+            throw _context2.t0.response.data.error;
+
+          case 13:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2, null, [[1, 9]]);
+  }));
+
+  return function (_x2, _x3) {
+    return _ref5.apply(this, arguments);
+  };
+}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["ALL_ACCOUNTS"], function () {
+  var _ref7 = _asyncToGenerator(
+  /*#__PURE__*/
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(_ref6, data) {
+    var commit, _ref8, _data;
+
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            commit = _ref6.commit;
+            _context3.prev = 1;
+            _context3.next = 4;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/api/accounts');
+
+          case 4:
+            _ref8 = _context3.sent;
+            _data = _ref8.data;
+            commit('account_get', _data.result);
+            return _context3.abrupt("return", _data.result);
+
+          case 10:
+            _context3.prev = 10;
+            _context3.t0 = _context3["catch"](1);
+            commit('account_error', _context3.t0.response.data.error);
+            throw _context3.t0.response.data.error;
+
+          case 14:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, null, [[1, 10]]);
+  }));
+
+  return function (_x4, _x5) {
+    return _ref7.apply(this, arguments);
+  };
+}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["GET_ACCOUNT"], function () {
+  var _ref10 = _asyncToGenerator(
+  /*#__PURE__*/
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4(_ref9, id) {
+    var commit, _ref11, data;
+
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            commit = _ref9.commit;
+            _context4.prev = 1;
+            _context4.next = 4;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/api/accounts/".concat(id));
+
+          case 4:
+            _ref11 = _context4.sent;
+            data = _ref11.data;
+            return _context4.abrupt("return", data.result);
+
+          case 9:
+            _context4.prev = 9;
+            _context4.t0 = _context4["catch"](1);
+            commit('account_error', _context4.t0.response.data.error);
+            throw _context4.t0.response.data.error;
+
+          case 13:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4, null, [[1, 9]]);
+  }));
+
+  return function (_x6, _x7) {
+    return _ref10.apply(this, arguments);
+  };
+}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["DELETE_ACCOUNT"], function () {
+  var _ref13 = _asyncToGenerator(
+  /*#__PURE__*/
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5(_ref12, id) {
+    var commit, _ref14, data;
+
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            commit = _ref12.commit;
+            _context5.prev = 1;
+            _context5.next = 4;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a["delete"]("/api/accounts/".concat(id));
+
+          case 4:
+            _ref14 = _context5.sent;
+            data = _ref14.data;
+            return _context5.abrupt("return", data.result);
+
+          case 9:
+            _context5.prev = 9;
+            _context5.t0 = _context5["catch"](1);
+            commit('account_error', _context5.t0.response.data.error);
+            throw _context5.t0.response.data.error;
+
+          case 13:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5, null, [[1, 9]]);
+  }));
+
+  return function (_x8, _x9) {
+    return _ref13.apply(this, arguments);
+  };
+}()), _actions);
 var mutations = {
-  accesstoken_url: function accesstoken_url(state, url) {
-    state.accessTokenURL = url;
+  google_token_url: function google_token_url(state, url) {
+    state.tokenURL = url;
   },
-  accesstoken_error: function accesstoken_error(state) {
-    state.accessTokenURL = "";
+  google_token_error: function google_token_error(state) {
+    state.tokenURL = "";
   },
   account_saved: function account_saved(state, account) {
     state.accounts = [].concat(_toConsumableArray(state.accounts), [account]);
@@ -58353,8 +58525,8 @@ var mutations = {
   account_get: function account_get(state, accounts) {
     state.accounts = accounts;
   },
-  account_error: function account_error(state, error) {
-    console.log(error);
+  account_error: function account_error(state, errors) {
+    state.errors = errors;
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = ({

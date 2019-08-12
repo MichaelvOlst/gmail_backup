@@ -2,90 +2,83 @@ import {GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT} fro
 import axios from 'axios';
 
 const state = {
-    accessTokenURL: "",
+    tokenURL: null,
     accounts: [],
+    errors: null
 };
 
 const getters = {
-    getAccessTokenURL(state) {
-        return state.accessTokenURL;
+    getTokenURL(state) {
+        return state.tokenURL;
     }
 };
-
+ 
 const actions = {
-    [GOOGLE_URL]({ commit }) {
-        return new Promise(resolve => {
-            axios.get('/api/google-url')
-                .then(({ data }) => {                                        
-                    commit('accesstoken_url', data.result)
-                    resolve(data)
-                })
-                .catch(() => {
-                    commit('accesstoken_error')
-                })
-        });
+    async [GOOGLE_URL]({ commit }) {
+        try {
+            const {data} = await axios.get('/api/google-url')
+            commit('google_token_url', data.result)
+            return data.result
+        } catch (error) {
+            commit('google_token_error', error.response.data.error)
+            throw error.response.data.error
+        }
     },
 
-    [SAVE_ACCOUNT]({commit}, data) {
-        return new Promise(resolve => {
-            axios.post('/api/accounts', data)
-                .then(({ data }) => {                                        
-                    commit('account_saved', data.result)
-                    resolve(data)
-                })
-                .catch((error) => {
-                    commit('account_error', error)
-                })
-        });
+    async [SAVE_ACCOUNT]({commit}, data) {
+        try {
+            const response = await axios.post('/api/accounts', data)
+            commit('account_saved', response.result)
+            return response
+        } catch(error) {
+            commit('account_error', error.response.data.error)
+            throw error.response.data.error
+        }
     },
 
-    [ALL_ACCOUNTS]({commit}, data) {
-        return new Promise(resolve => {
-            axios.get('/api/accounts')
-                .then(({ data }) => {                                                            
-                    commit('account_get', data.result)
-                    resolve(data)
-                })
-                .catch((error) => {
-                    commit('account_error', error)
-                })
-        });
+    async [ALL_ACCOUNTS]({commit}, data) {
+        try {
+            const {data} = await axios.get('/api/accounts')
+            commit('account_get', data.result)
+            return data.result
+        } catch(error) {
+            commit('account_error', error.response.data.error)
+            throw error.response.data.error
+        }
     },
 
-    [GET_ACCOUNT]({commit}, id) {
-        return new Promise(resolve => {
-            axios.get(`/api/accounts/${id}`)
-                .then(({ data }) => {
-                    resolve(data.result)
-                })
-                .catch((error) => {
-                    commit('account_error', error)
-                })
-        });
+    async [GET_ACCOUNT]({commit}, id) {
+
+        try {
+            const {data} = await axios.get(`/api/accounts/${id}`)
+            return data.result
+        } catch (error) {
+            commit('account_error', error.response.data.error)
+            throw error.response.data.error
+        }
     },
 
-    [DELETE_ACCOUNT]({commit}, id) {
-        return new Promise(resolve => {
-            axios.delete(`/api/accounts/${id}`)
-                .then(({ data }) => {
-                    resolve(data.result)
-                })
-                .catch((error) => {
-                    commit('account_error', error)
-                })
-        });
-    },
+    async [DELETE_ACCOUNT]({commit}, id) {
+
+        try {
+            const {data} = await axios.delete(`/api/accounts/${id}`)
+            return data.result
+        } catch (error) {
+            commit('account_error', error.response.data.error)
+            throw error.response.data.error
+        }
+    }
     
 };
 
 const mutations = {
 
-    accesstoken_url(state, url) {
-        state.accessTokenURL = url
+    google_token_url(state, url) {
+        state.tokenURL = url
     },
 
-    accesstoken_error(state) {
-        state.accessTokenURL = ""
+    google_token_error(state) {
+        state.tokenURL = ""
     },
 
     account_saved(state, account) {
@@ -96,8 +89,8 @@ const mutations = {
         state.accounts = accounts
     },
 
-    account_error(state, error) {
-        console.log(error)
+    account_error(state, errors) {
+        state.errors = errors
     }
 };
 

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/gmail/v1"
 )
 
-// HandlerGetGoogleURL gets the URL for the accesstoken
+// HandlerGetGoogleURL gets the URL for the token
 func (a *API) HandlerGetGoogleURL(w http.ResponseWriter, r *http.Request) error {
 	b, err := ioutil.ReadFile(a.config.Google.File)
 	if err != nil {
