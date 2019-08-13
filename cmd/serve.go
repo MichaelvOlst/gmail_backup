@@ -31,7 +31,7 @@ var serveCmd = &cobra.Command{
 		fmt.Printf("Running app on http://%s\n", addr)
 
 		box := packr.NewBox("./../public")
-		api := api.New(app.config, app.db, &box)
+		api := api.New(app.config, app.db, &box, app.storage)
 
 		server := &http.Server{
 			Addr:         addr,
