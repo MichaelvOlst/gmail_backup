@@ -1,7 +1,6 @@
 package models
 
 import (
-	"gmail_backup/pkg/storage"
 	"regexp"
 	"strings"
 	"time"
@@ -9,14 +8,13 @@ import (
 
 // Account is the model for accounts
 type Account struct {
-	ID             int           `json:"id" storm:"id,increment"`
-	Email          string        `json:"email" storm:"unique"`
-	EncryptionKey  string        `json:"encryption_key"`
-	Attachments    bool          `json:"attachments"`
-	BackupComplete bool          `json:"backup_complete"`
-	BackupDate     time.Time     `json:"backup_date"`
-	GoogleToken    string        `json:"google_token"`
-	StorageTypes   storage.Types `json:storage_types`
+	ID             int       `json:"id" storm:"id,increment"`
+	Email          string    `json:"email" storm:"unique"`
+	EncryptionKey  string    `json:"encryption_key"`
+	Attachments    bool      `json:"attachments"`
+	BackupComplete bool      `json:"backup_complete"`
+	BackupDate     time.Time `json:"backup_date"`
+	GoogleToken    string    `json:"google_token"`
 }
 
 // Validate the account model

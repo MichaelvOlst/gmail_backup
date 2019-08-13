@@ -58663,7 +58663,7 @@ var DELETE_ACCOUNT = "deleteAccount";
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /home/michael/Desktop/gmail_backup/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /Users/michaelolst/Desktop/gmail_backup/resources/js/app.js */"./resources/js/app.js");
 
 
 /***/ })

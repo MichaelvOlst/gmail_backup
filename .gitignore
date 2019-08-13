@@ -5,6 +5,8 @@
 *.so
 *.dylib
 credentials.json
+gmail_backup
+/.vscode
 
 # Test binary, build with `go test -c`
 *.test
