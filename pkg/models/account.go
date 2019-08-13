@@ -37,6 +37,5 @@ func (a *Account) Validate() map[string]string {
 			v["email"] = "Enter an valid email"
 		}
 	}
-
 	return v
 }
