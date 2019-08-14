@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"gmail_backup/pkg/models"
 	"net/http"
 )
@@ -8,11 +9,11 @@ import (
 // HandlerGetSettings gets the app settings
 func (a *API) HandlerGetSettings(w http.ResponseWriter, r *http.Request) error {
 
-	// a.storage.getProviders()
-	var s models.Settings
+	s := models.Settings{}
 	err := a.db.Get("settings", "settings", &s)
 	if err != nil {
-		return respond(w, http.StatusInternalServerError, envelope{Result: "Could not retrieve settings"})
+		fmt.Println(err)
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
 	return respond(w, http.StatusOK, envelope{Result: s})

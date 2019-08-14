@@ -9,8 +9,9 @@ type Settings struct {
 
 // StorageOptions ...
 type StorageOptions struct {
-	Option storage.Provider `json:"option"`
-	Active bool             `json:"active"`
-	Path   string           `json:"path"`
-	Config interface{}      `json:"config"`
+	Provider storage.Provider `json:"-"`
+	Name     string           `json:"name"`
+	Active   bool             `json:"active"`
+	Path     string           `json:"path"`
+	Config   interface{}      `json:"config"`
 }

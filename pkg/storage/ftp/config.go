@@ -10,7 +10,6 @@ type Config struct {
 
 // Provider implements storage.Provider for the ftp file storage.
 type Provider struct {
-	Config Config
 }
 
 // Name returns ftp

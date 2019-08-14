@@ -10,10 +10,9 @@ type Config struct {
 
 // Provider implements storage.Provider for the ftp file storage.
 type Provider struct {
-	Config Config
 }
 
-// Name returns ftp
+// Name returns google_drive
 func (p *Provider) Name() string {
 	return name
 }
