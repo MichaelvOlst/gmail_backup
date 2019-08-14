@@ -7,7 +7,9 @@ type Storage struct {
 
 // New returns a new Storage
 func New() *Storage {
-	return &Storage{}
+	return &Storage{
+		Providers: make(map[string]Provider),
+	}
 }
 
 // UseProviders adds a list of available providers for use with Storage.

@@ -16,7 +16,7 @@ func (a *API) Routes() *mux.Router {
 
 	r.Handle("/api/google-url", a.Authorize(HandlerFunc(a.HandlerGetGoogleURL))).Methods(http.MethodGet)
 
-	r.Handle("/api/settingsl", a.Authorize(HandlerFunc(a.HandlerGetSettings))).Methods(http.MethodGet)
+	r.Handle("/api/settings", a.Authorize(HandlerFunc(a.HandlerGetSettings))).Methods(http.MethodGet)
 
 	r.Handle("/api/accounts", a.Authorize(HandlerFunc(a.HandlerGetAllAccounts))).Methods(http.MethodGet)
 	r.Handle("/api/accounts/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerGetSingleAccount))).Methods(http.MethodGet)

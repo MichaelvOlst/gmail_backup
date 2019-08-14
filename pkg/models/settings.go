@@ -1,13 +1,16 @@
 package models
 
+import "gmail_backup/pkg/storage"
+
 // Settings is the model for settings of this app
 type Settings struct {
-	Ftp FtpOption `json:"ftp"`
+	StorageOptions []StorageOptions `json:"storage_options"`
 }
 
-// FtpOption holds the config for Ftp
-type FtpOption struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Path     string `json:"path"`
+// StorageOptions ...
+type StorageOptions struct {
+	Option storage.Provider `json:"option"`
+	Active bool             `json:"active"`
+	Path   string           `json:"path"`
+	Config interface{}      `json:"config"`
 }

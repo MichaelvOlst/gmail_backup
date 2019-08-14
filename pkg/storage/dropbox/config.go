@@ -1,11 +1,10 @@
-package ftp
+package dropbox
 
-const name = "ftp"
+const name = "dropbox"
 
-// Config holds the config the ftp option
+// Config holds the config for the Dropbox option
 type Config struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	AccessToken string `json:"accesstoken"`
 }
 
 // Provider implements storage.Provider for the ftp file storage.

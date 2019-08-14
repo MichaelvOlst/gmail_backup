@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
 	"gmail_backup/pkg/config"
 	"gmail_backup/pkg/database"
 	"gmail_backup/pkg/models"
 	"gmail_backup/pkg/storage"
+	"gmail_backup/pkg/storage/drive"
+	"gmail_backup/pkg/storage/dropbox"
+	"gmail_backup/pkg/storage/ftp"
 	"os"
 
 	"github.com/labstack/gommon/log"
@@ -51,23 +52,32 @@ func initApp() {
 	app.config = config
 	app.db = db
 
-	app.storage = storage.New()
-
-	s := models.Settings{}
+	s := models.Settings{StorageOptions: []models.StorageOptions{
+		models.StorageOptions{
+			Option: ftp.New(),
+			Active: true,
+			Config: ftp.Config{},
+		},
+		models.StorageOptions{
+			Option: dropbox.New(),
+			Active: true,
+			Config: dropbox.Config{},
+		},
+		models.StorageOptions{
+			Option: drive.New(),
+			Active: true,
+			Config: drive.Config{},
+		},
+	}}
 	app.db.Set("settings", "settings", &s)
 
-	err = db.Get("settings", "settings", &s)
-	if err != nil {
-		log.Errorf("settings problem: %v", err)
-		os.Exit(1)
-	}
+	app.storage = storage.New()
 
-	b, err := json.Marshal(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	for _, val := range s.StorageOptions {
+		if val.Active {
+			app.storage.Register(val.Option)
+		}
 	}
-	fmt.Println(string(b))
 
 }
 

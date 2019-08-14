@@ -1,11 +1,11 @@
-package ftp
+package drive
 
-const name = "ftp"
+const name = "google_drive"
 
 // Config holds the config the ftp option
 type Config struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Client string `json:"client"`
+	Secret string `json:"secret"`
 }
 
 // Provider implements storage.Provider for the ftp file storage.
