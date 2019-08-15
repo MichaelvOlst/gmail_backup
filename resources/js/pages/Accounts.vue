@@ -9,7 +9,6 @@
     <template v-slot:item.attachments="{ item }">
       <v-icon v-if="item.attachments">done</v-icon>
       <v-icon v-else>clear</v-icon>
-
     </template>
 
     <template v-slot:top>

@@ -1,27 +1,35 @@
 <template>
   <v-app id="gmail_backup">
     <v-navigation-drawer app clipped>
-       <v-list dense class="grey lighten-4">        
-          <v-list-item to="dashboard">
-            <v-list-item-action>
+       <v-list dense class="grey lighten-4" nav>        
+        <v-list-item to="/dashboard">
+          <v-list-item-action>
             <v-icon>dashboard</v-icon>
-            </v-list-item-action>
-            <v-list-item-title>
-              Dashboard
-            </v-list-item-title>
+          </v-list-item-action>
+          <v-list-item-title>Dashboard</v-list-item-title>
         </v-list-item>
-        <v-list-item to="accounts">
-            <v-list-item-action>
+        <v-list-item to="/accounts">
+          <v-list-item-action>
             <v-icon>people</v-icon>
-            </v-list-item-action>
-            <v-list-item-title>Account</v-list-item-title>
+          </v-list-item-action>
+          <v-list-item-title>Account</v-list-item-title>
         </v-list-item>
-        <v-list-item to="settings">
-            <v-list-item-action>
-            <v-icon>settings</v-icon>
-            </v-list-item-action>
+
+        <v-list-group prepend-icon="settings" append-icon="expand_more" no-action>
+          <template v-slot:activator>
             <v-list-item-title>Settings</v-list-item-title>
-        </v-list-item>
+          </template>
+
+          <v-list-item to="/settings/storage">
+            <v-list-item-icon>
+              <v-icon>storage</v-icon>
+            </v-list-item-icon>
+            <v-list-item-title>Storage</v-list-item-title>
+          </v-list-item>
+        </v-list-group>
+      </v-list>
+
+      <v-list dense class="grey lighten-4" nav> 
         <v-list-item v-if="isAuthenticated" @click.prevent="logout()" class="logout_button">
             <v-list-item-action>
             <v-icon>logout</v-icon>

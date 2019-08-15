@@ -1935,6 +1935,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1986,7 +1994,6 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-//
 //
 //
 //
@@ -2412,13 +2419,121 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _store_modules_types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./../store/modules/types */ "./resources/js/store/modules/types.js");
+
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 //
 //
 //
 //
 //
 //
-/* harmony default export */ __webpack_exports__["default"] = ({});
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      valid: false,
+      firstname: '',
+      lastname: '',
+      nameRules: [function (v) {
+        return !!v || 'Name is required';
+      }, function (v) {
+        return v.length <= 10 || 'Name must be less than 10 characters';
+      }],
+      email: '',
+      emailRules: [function (v) {
+        return !!v || 'E-mail is required';
+      }, function (v) {
+        return /.+@.+/.test(v) || 'E-mail must be valid';
+      }]
+    };
+  },
+  created: function () {
+    var _created = _asyncToGenerator(
+    /*#__PURE__*/
+    _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+      var response;
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              try {
+                response = this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_2__["GET_SETTINGS"]);
+              } catch (e) {
+                console.log(e);
+              }
+
+            case 1:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    function created() {
+      return _created.apply(this, arguments);
+    }
+
+    return created;
+  }(),
+  computed: _objectSpread({}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapState"])({
+    settings: function settings(state) {
+      return state.settings.settings;
+    }
+  })),
+  methods: {
+    save: function save() {
+      alert("Saving...");
+    }
+  }
+});
 
 /***/ }),
 
@@ -5081,11 +5196,11 @@ var render = function() {
         [
           _c(
             "v-list",
-            { staticClass: "grey lighten-4", attrs: { dense: "" } },
+            { staticClass: "grey lighten-4", attrs: { dense: "", nav: "" } },
             [
               _c(
                 "v-list-item",
-                { attrs: { to: "dashboard" } },
+                { attrs: { to: "/dashboard" } },
                 [
                   _c(
                     "v-list-item-action",
@@ -5093,16 +5208,14 @@ var render = function() {
                     1
                   ),
                   _vm._v(" "),
-                  _c("v-list-item-title", [
-                    _vm._v("\n            Dashboard\n          ")
-                  ])
+                  _c("v-list-item-title", [_vm._v("Dashboard")])
                 ],
                 1
               ),
               _vm._v(" "),
               _c(
                 "v-list-item",
-                { attrs: { to: "accounts" } },
+                { attrs: { to: "/accounts" } },
                 [
                   _c(
                     "v-list-item-action",
@@ -5116,20 +5229,50 @@ var render = function() {
               ),
               _vm._v(" "),
               _c(
-                "v-list-item",
-                { attrs: { to: "settings" } },
+                "v-list-group",
+                {
+                  attrs: {
+                    "prepend-icon": "settings",
+                    "append-icon": "expand_more",
+                    "no-action": ""
+                  },
+                  scopedSlots: _vm._u([
+                    {
+                      key: "activator",
+                      fn: function() {
+                        return [_c("v-list-item-title", [_vm._v("Settings")])]
+                      },
+                      proxy: true
+                    }
+                  ])
+                },
                 [
-                  _c(
-                    "v-list-item-action",
-                    [_c("v-icon", [_vm._v("settings")])],
-                    1
-                  ),
                   _vm._v(" "),
-                  _c("v-list-item-title", [_vm._v("Settings")])
+                  _c(
+                    "v-list-item",
+                    { attrs: { to: "/settings/storage" } },
+                    [
+                      _c(
+                        "v-list-item-icon",
+                        [_c("v-icon", [_vm._v("storage")])],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c("v-list-item-title", [_vm._v("Storage")])
+                    ],
+                    1
+                  )
                 ],
                 1
-              ),
-              _vm._v(" "),
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "v-list",
+            { staticClass: "grey lighten-4", attrs: { dense: "", nav: "" } },
+            [
               _vm.isAuthenticated
                 ? _c(
                     "v-list-item",
@@ -5712,16 +5855,96 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c(
+    "v-container",
+    [
+      _c(
+        "v-form",
+        { ref: "formSettings" },
+        _vm._l(_vm.settings.storage_options, function(option) {
+          return _c(
+            "v-card",
+            { key: option.name, staticClass: "mb-5" },
+            [
+              _c(
+                "v-card-title",
+                [
+                  _c("span", { staticClass: "mr-2" }, [
+                    _vm._v(_vm._s(option.name))
+                  ]),
+                  _vm._v(" "),
+                  _c("v-divider"),
+                  _vm._v(" "),
+                  _c(
+                    "v-btn",
+                    {
+                      staticClass: "mx-2 mt-1",
+                      attrs: { fab: "", dark: "", small: "", color: "primary" },
+                      on: {
+                        click: function($event) {
+                          return _vm.save()
+                        }
+                      }
+                    },
+                    [_c("v-icon", [_vm._v("save")])],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "v-card-text",
+                [
+                  _c("v-switch", {
+                    attrs: { label: "Active", color: "primary" },
+                    model: {
+                      value: option.active,
+                      callback: function($$v) {
+                        _vm.$set(option, "active", $$v)
+                      },
+                      expression: "option.active"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("v-text-field", {
+                    attrs: { label: "Path", required: "" },
+                    model: {
+                      value: option.path,
+                      callback: function($$v) {
+                        _vm.$set(option, "path", $$v)
+                      },
+                      expression: "option.path"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _vm._l(Object.keys(option.config), function(value, key) {
+                    return _c("v-text-field", {
+                      key: key,
+                      attrs: { label: value, required: "" },
+                      model: {
+                        value: option.config[value],
+                        callback: function($$v) {
+                          _vm.$set(option.config, value, $$v)
+                        },
+                        expression: "option.config[value]"
+                      }
+                    })
+                  })
+                ],
+                2
+              )
+            ],
+            1
+          )
+        }),
+        1
+      )
+    ],
+    1
+  )
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", [_c("h1", [_vm._v("Settings")])])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -58220,8 +58443,8 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
       requiresAuth: true
     }
   }, {
-    path: '/settings',
-    name: 'settings',
+    path: '/settings/storage',
+    name: 'settings_storage',
     component: _pages_Settings_vue__WEBPACK_IMPORTED_MODULE_7__["default"],
     meta: {
       requiresAuth: true
@@ -58267,6 +58490,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _modules_auth__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/auth */ "./resources/js/store/modules/auth.js");
 /* harmony import */ var _modules_accounts__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/accounts */ "./resources/js/store/modules/accounts.js");
+/* harmony import */ var _modules_settings__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/settings */ "./resources/js/store/modules/settings.js");
+
 
 
 
@@ -58275,7 +58500,8 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__
 /* harmony default export */ __webpack_exports__["default"] = (new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
   modules: {
     auth: _modules_auth__WEBPACK_IMPORTED_MODULE_2__["default"],
-    accounts: _modules_accounts__WEBPACK_IMPORTED_MODULE_3__["default"]
+    accounts: _modules_accounts__WEBPACK_IMPORTED_MODULE_3__["default"],
+    settings: _modules_settings__WEBPACK_IMPORTED_MODULE_4__["default"]
   }
 }));
 
@@ -58628,11 +58854,100 @@ var mutations = {
 
 /***/ }),
 
+/***/ "./resources/js/store/modules/settings.js":
+/*!************************************************!*\
+  !*** ./resources/js/store/modules/settings.js ***!
+  \************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./types */ "./resources/js/store/modules/types.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
+var state = {
+  settings: {
+    storage_options: []
+  },
+  error: {}
+};
+var getters = {};
+
+var actions = _defineProperty({}, _types__WEBPACK_IMPORTED_MODULE_1__["GET_SETTINGS"], function () {
+  var _ref2 = _asyncToGenerator(
+  /*#__PURE__*/
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(_ref) {
+    var commit, _ref3, data;
+
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            commit = _ref.commit;
+            _context.prev = 1;
+            _context.next = 4;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/api/settings');
+
+          case 4:
+            _ref3 = _context.sent;
+            data = _ref3.data;
+            commit('set_settings', data.result);
+            return _context.abrupt("return", data.result);
+
+          case 10:
+            _context.prev = 10;
+            _context.t0 = _context["catch"](1);
+            commit('set_settings_error', _context.t0.response.data.error);
+            throw _context.t0.response.data.error;
+
+          case 14:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[1, 10]]);
+  }));
+
+  return function (_x) {
+    return _ref2.apply(this, arguments);
+  };
+}());
+
+var mutations = {
+  set_settings: function set_settings(state, settings) {
+    state.settings = settings;
+  },
+  set_settings_error: function set_settings_error(state, error) {
+    state.error = error;
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = ({
+  state: state,
+  actions: actions,
+  mutations: mutations,
+  getters: getters
+});
+
+/***/ }),
+
 /***/ "./resources/js/store/modules/types.js":
 /*!*********************************************!*\
   !*** ./resources/js/store/modules/types.js ***!
   \*********************************************/
-/*! exports provided: CHECK_AUTH, LOGIN, LOGOUT, GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT */
+/*! exports provided: CHECK_AUTH, LOGIN, LOGOUT, GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT, GET_SETTINGS, SAVE_SETTINGS */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -58645,6 +58960,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ALL_ACCOUNTS", function() { return ALL_ACCOUNTS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GET_ACCOUNT", function() { return GET_ACCOUNT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DELETE_ACCOUNT", function() { return DELETE_ACCOUNT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GET_SETTINGS", function() { return GET_SETTINGS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SAVE_SETTINGS", function() { return SAVE_SETTINGS; });
 var CHECK_AUTH = "checkAuth";
 var LOGIN = "login";
 var LOGOUT = "logout";
@@ -58653,6 +58970,8 @@ var SAVE_ACCOUNT = "saveAccount";
 var ALL_ACCOUNTS = "allAccounts";
 var GET_ACCOUNT = "getAccount";
 var DELETE_ACCOUNT = "deleteAccount";
+var GET_SETTINGS = "getSettings";
+var SAVE_SETTINGS = "saveSettings";
 
 /***/ }),
 

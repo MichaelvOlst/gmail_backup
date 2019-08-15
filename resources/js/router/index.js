@@ -19,7 +19,7 @@ const router = new Router({
     { path: '/login', name: 'login', component: Login},
     { path: '/dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/accounts', name: 'accounts', component: Accounts, meta: { requiresAuth: true } },
-    { path: '/settings', name: 'settings', component: Settings, meta: { requiresAuth: true } },
+    { path: '/settings/storage', name: 'settings_storage', component: Settings, meta: { requiresAuth: true } },
     { path: '/', redirect: '/dashboard' }
   ]
 })
