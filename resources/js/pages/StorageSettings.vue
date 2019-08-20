@@ -38,7 +38,7 @@
 
 <script>
   import { mapState } from 'vuex'
-  import { GET_SETTINGS, SAVE_SETTINGS } from './../store/modules/types'  
+  import { GET_SETTINGS, SAVE_SETTINGS, NOTIFY } from './../store/modules/types' 
 
   export default {
 
@@ -59,7 +59,8 @@
     methods: {
       async save() {
         try {
-          let response = this.$store.dispatch(SAVE_SETTINGS, this.settings)  
+          let response = this.$store.dispatch(SAVE_SETTINGS, this.settings)
+          this.$store.commit(NOTIFY, "Settings saved")
         } catch(e) {
           console.log(e);
         }

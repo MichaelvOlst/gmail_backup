@@ -56,6 +56,9 @@
         </v-layout>
       </v-container>
     </v-content>
+
+    <Notification />
+
   </v-app>
 </template>
 
@@ -64,9 +67,14 @@
 <script>
   import { mapGetters } from 'vuex'
   import { LOGOUT } from './store/modules/types'  
+  import Notification from './components/Notification'
 
   export default {
     name: "App",
+
+    components: {
+      Notification
+    },
 
     computed: {
       ...mapGetters([
