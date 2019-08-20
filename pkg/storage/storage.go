@@ -1,5 +1,11 @@
 package storage
 
+import (
+	"gmail_backup/pkg/storage/drive"
+	"gmail_backup/pkg/storage/dropbox"
+	"gmail_backup/pkg/storage/ftp"
+)
+
 // Storage handles the storage options
 type Storage struct {
 	Providers map[string]Provider
@@ -25,8 +31,27 @@ type Provider interface {
 }
 
 // Register a new Provider in storage map
-func (s *Storage) Register(p Provider) {
-	s.Providers[p.Name()] = p
+func (s *Storage) Register(option string) {
+
+	var p Provider
+	if option == "ftp" {
+		p = ftp.New()
+	}
+
+	if option == "dropbox" {
+		p = dropbox.New()
+	}
+
+	if option == "google_drive" {
+		p = drive.New()
+	}
+
+	s.Providers[option] = p
+}
+
+// ClearProviders will remove all providers currently in use.
+func (s *Storage) ClearProviders() {
+	s.Providers = make(map[string]Provider)
 }
 
 // GetProviders returns the registered providers

@@ -9,7 +9,7 @@ Vue.use(Router)
 import Login from '../pages/Login.vue';
 import Dashboard from '../pages/Dashboard.vue';
 import Accounts from '../pages/Accounts.vue';
-import Settings from '../pages/Settings.vue';
+import StorageSettings from '../pages/StorageSettings.vue';
 
 
 const router = new Router({
@@ -19,7 +19,7 @@ const router = new Router({
     { path: '/login', name: 'login', component: Login},
     { path: '/dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
     { path: '/accounts', name: 'accounts', component: Accounts, meta: { requiresAuth: true } },
-    { path: '/settings/storage', name: 'settings_storage', component: Settings, meta: { requiresAuth: true } },
+    { path: '/settings/storage', name: 'settings_storage', component: StorageSettings, meta: { requiresAuth: true } },
     { path: '/', redirect: '/dashboard' }
   ]
 })

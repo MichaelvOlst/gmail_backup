@@ -49,7 +49,7 @@
 
     <v-content>
       <v-container fill-height>
-        <v-layout justify-center align-center>
+        <v-layout >
            <v-flex md12 lg12 class="pa-0 ma-0 ">
             <router-view></router-view>
           </v-flex>

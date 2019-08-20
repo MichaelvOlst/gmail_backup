@@ -54,22 +54,22 @@ func initApp() {
 
 	s := models.Settings{StorageOptions: []models.StorageOptions{
 		models.StorageOptions{
-			Name:     "ftp",
-			Provider: ftp.New(),
-			Active:   true,
-			Config:   ftp.Config{},
+			Option: "ftp",
+			Name:   "Ftp",
+			Active: true,
+			Config: ftp.Config{},
 		},
 		models.StorageOptions{
-			Name:     "dropbox",
-			Provider: dropbox.New(),
-			Active:   true,
-			Config:   dropbox.Config{},
+			Option: "dropbox",
+			Name:   "Dropbox",
+			Active: true,
+			Config: dropbox.Config{},
 		},
 		models.StorageOptions{
-			Name:     "google_drive",
-			Provider: drive.New(),
-			Active:   true,
-			Config:   drive.Config{},
+			Option: "google_drive",
+			Name:   "Google Drive",
+			Active: true,
+			Config: drive.Config{},
 		},
 	}}
 	app.db.Set("settings", "settings", &s)
@@ -78,7 +78,7 @@ func initApp() {
 
 	for _, val := range s.StorageOptions {
 		if val.Active {
-			app.storage.Register(val.Provider)
+			app.storage.Register(val.Option)
 		}
 	}
 

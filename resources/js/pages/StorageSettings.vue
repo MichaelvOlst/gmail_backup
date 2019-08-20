@@ -38,23 +38,9 @@
 
 <script>
   import { mapState } from 'vuex'
-  import { GET_SETTINGS } from './../store/modules/types'  
+  import { GET_SETTINGS, SAVE_SETTINGS } from './../store/modules/types'  
 
   export default {
-    data: () => ({
-      valid: false,
-      firstname: '',
-      lastname: '',
-      nameRules: [
-        v => !!v || 'Name is required',
-        v => v.length <= 10 || 'Name must be less than 10 characters',
-      ],
-      email: '',
-      emailRules: [
-        v => !!v || 'E-mail is required',
-        v => /.+@.+/.test(v) || 'E-mail must be valid',
-      ],
-    }),
 
     async created () {
       try {
@@ -71,8 +57,12 @@
     },
 
     methods: {
-      save() {
-        alert("Saving...")
+      async save() {
+        try {
+          let response = this.$store.dispatch(SAVE_SETTINGS, this.settings)  
+        } catch(e) {
+          console.log(e);
+        }
       }
     }
 
