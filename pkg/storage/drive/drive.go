@@ -18,6 +18,6 @@ func (p *Provider) Name() string {
 }
 
 // New initializer for Provider struct ftp
-func New() *Provider {
+func New(cfg Config) *Provider {
 	return &Provider{}
 }

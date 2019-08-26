@@ -21,6 +21,7 @@ func (a *API) HandlerGetSettings(w http.ResponseWriter, r *http.Request) error {
 // HandlerSaveSettings gets the app settings
 func (a *API) HandlerSaveSettings(w http.ResponseWriter, r *http.Request) error {
 	var s models.Settings
+
 	err := json.NewDecoder(r.Body).Decode(&s)
 	if err != nil {
 		return err
@@ -32,11 +33,11 @@ func (a *API) HandlerSaveSettings(w http.ResponseWriter, r *http.Request) error 
 	}
 
 	a.storage.ClearProviders()
-	for _, val := range s.StorageOptions {
-		if val.Active {
-			a.storage.Register(val.Option)
-		}
-	}
+	// for _, val := range s.StorageOptions {
+	// 	if val.Active {
+	// 		a.storage.Register(val.Option, val.Config)
+	// 	}
+	// }
 
 	return respond(w, http.StatusOK, envelope{Result: s})
 }

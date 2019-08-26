@@ -11,6 +11,7 @@ require (
 	github.com/coreos/etcd v3.3.15+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
+	github.com/dropbox/dropbox-sdk-go-unofficial v5.4.0+incompatible
 	github.com/go-kit/kit v0.9.0 // indirect
 	github.com/gobuffalo/flect v0.1.6 // indirect
 	github.com/gobuffalo/helpers v0.2.4 // indirect

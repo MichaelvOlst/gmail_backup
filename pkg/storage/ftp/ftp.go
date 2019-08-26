@@ -1,10 +1,11 @@
-package dropbox
+package ftp
 
-const name = "dropbox"
+const name = "ftp"
 
-// Config holds the config for the Dropbox option
+// Config holds the config the ftp option
 type Config struct {
-	AccessToken string `json:"accesstoken"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 // Provider implements storage.Provider for the ftp file storage.
@@ -17,6 +18,6 @@ func (p *Provider) Name() string {
 }
 
 // New initializer for Provider struct ftp
-func New() *Provider {
+func New(cfg Config) *Provider {
 	return &Provider{}
 }

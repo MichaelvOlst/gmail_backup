@@ -5,9 +5,6 @@ import (
 	"gmail_backup/pkg/database"
 	"gmail_backup/pkg/models"
 	"gmail_backup/pkg/storage"
-	"gmail_backup/pkg/storage/drive"
-	"gmail_backup/pkg/storage/dropbox"
-	"gmail_backup/pkg/storage/ftp"
 	"os"
 
 	"github.com/labstack/gommon/log"
@@ -52,35 +49,45 @@ func initApp() {
 	app.config = config
 	app.db = db
 
-	s := models.Settings{StorageOptions: []models.StorageOptions{
-		models.StorageOptions{
-			Option: "ftp",
-			Name:   "Ftp",
-			Active: true,
-			Config: ftp.Config{},
+	s := models.Settings{
+		StorageOptions: models.StorageOptions{
+			Dropbox: models.Dropbox{
+				StorageOption: models.StorageOption{
+					Option: "dropbox",
+					Name:   "Dropbox",
+					Active: true,
+				},
+			},
+			Ftp: models.Ftp{
+				StorageOption: models.StorageOption{
+					Option: "ftp",
+					Name:   "Ftp",
+					Active: true,
+				},
+			},
+			GoogleDrive: models.GoogleDrive{
+				StorageOption: models.StorageOption{
+					Option: "google_drive",
+					Name:   "Google Drive",
+					Active: true,
+				},
+			},
 		},
-		models.StorageOptions{
-			Option: "dropbox",
-			Name:   "Dropbox",
-			Active: true,
-			Config: dropbox.Config{},
-		},
-		models.StorageOptions{
-			Option: "google_drive",
-			Name:   "Google Drive",
-			Active: true,
-			Config: drive.Config{},
-		},
-	}}
+	}
+
 	app.db.Set("settings", "settings", &s)
 
 	app.storage = storage.New()
 
-	for _, val := range s.StorageOptions {
-		if val.Active {
-			app.storage.Register(val.Option)
-		}
-	}
+	app.storage.RegisterAll(&s)
+
+	// for key, val := range s.StorageOptions {
+	// 	fmt.Println(key)
+	// 	fmt.Println(val)
+	// 	// 	if val.Active {
+	// 	// 		app.storage.Register(val.Option, val.Config)
+	// 	// 	}
+	// }
 
 }
 

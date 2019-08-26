@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"gmail_backup/pkg/models"
 	"gmail_backup/pkg/storage/drive"
 	"gmail_backup/pkg/storage/dropbox"
 	"gmail_backup/pkg/storage/ftp"
@@ -9,6 +10,10 @@ import (
 // Storage handles the storage options
 type Storage struct {
 	Providers map[string]Provider
+}
+
+// Config default config
+type Config interface {
 }
 
 // New returns a new Storage
@@ -31,22 +36,25 @@ type Provider interface {
 }
 
 // Register a new Provider in storage map
-func (s *Storage) Register(option string) {
+func (s *Storage) Register(p Provider) {
+	s.Providers[p.Name()] = p
+}
 
-	var p Provider
-	if option == "ftp" {
-		p = ftp.New()
+// RegisterAll registers all providers via the settings
+func (s *Storage) RegisterAll(settings *models.Settings) {
+
+	if settings.StorageOptions.Ftp.StorageOption.Active {
+		s.Providers[settings.StorageOptions.Ftp.StorageOption.Option] = ftp.New(settings.StorageOptions.Ftp.Config)
 	}
 
-	if option == "dropbox" {
-		p = dropbox.New()
+	if settings.StorageOptions.Dropbox.StorageOption.Active {
+		s.Providers[settings.StorageOptions.Dropbox.StorageOption.Option] = dropbox.New(settings.StorageOptions.Dropbox.Config)
 	}
 
-	if option == "google_drive" {
-		p = drive.New()
+	if settings.StorageOptions.GoogleDrive.StorageOption.Active {
+		s.Providers[settings.StorageOptions.GoogleDrive.StorageOption.Option] = drive.New(settings.StorageOptions.GoogleDrive.Config)
 	}
 
-	s.Providers[option] = p
 }
 
 // ClearProviders will remove all providers currently in use.

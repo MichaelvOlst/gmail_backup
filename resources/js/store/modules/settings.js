@@ -6,16 +6,16 @@ import {
   
   const state = {
     settings: {
-      storage_options: []
+      storage_options: {}
     },
-    error: {},
+    error: null,
   };
 
   
   const actions = {
     async [GET_SETTINGS]({ commit }) {
       try {
-          const {data} = await axios.get('/api/settings')
+          const {data} = await axios.get('/api/settings')          
           commit('set_settings', data.result)
           return data.result
       } catch (error) {
