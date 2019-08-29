@@ -7,6 +7,7 @@ import (
 	"gmail_backup/pkg/storage"
 	"os"
 
+	"github.com/asdine/storm"
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 )
@@ -49,45 +50,54 @@ func initApp() {
 	app.config = config
 	app.db = db
 
-	s := models.Settings{
-		StorageOptions: models.StorageOptions{
-			Dropbox: models.Dropbox{
-				StorageOption: models.StorageOption{
-					Option: "dropbox",
-					Name:   "Dropbox",
-					Active: true,
-				},
-			},
-			Ftp: models.Ftp{
-				StorageOption: models.StorageOption{
-					Option: "ftp",
-					Name:   "Ftp",
-					Active: true,
-				},
-			},
-			GoogleDrive: models.GoogleDrive{
-				StorageOption: models.StorageOption{
-					Option: "google_drive",
-					Name:   "Google Drive",
-					Active: true,
-				},
-			},
-		},
-	}
-
-	app.db.Set("settings", "settings", &s)
-
 	app.storage = storage.New()
 
-	app.storage.RegisterAll(&s)
+	var s = models.Settings{}
+	_, err = app.db.GetBytes("settings", "settings")
 
-	// for key, val := range s.StorageOptions {
-	// 	fmt.Println(key)
-	// 	fmt.Println(val)
-	// 	// 	if val.Active {
-	// 	// 		app.storage.Register(val.Option, val.Config)
-	// 	// 	}
-	// }
+	if err == storm.ErrNotFound {
+		s = models.Settings{
+			StorageOptions: models.StorageOptions{
+				Dropbox: models.Dropbox{
+					StorageOption: models.StorageOption{
+						Option: "dropbox",
+						Name:   "Dropbox",
+						Active: true,
+					},
+				},
+				Ftp: models.Ftp{
+					StorageOption: models.StorageOption{
+						Option: "ftp",
+						Name:   "Ftp",
+						Active: true,
+					},
+				},
+				GoogleDrive: models.GoogleDrive{
+					StorageOption: models.StorageOption{
+						Option: "google_drive",
+						Name:   "Google Drive",
+						Active: true,
+					},
+				},
+			},
+		}
+
+		app.db.Set("settings", "settings", &s)
+		app.storage.RegisterAll(&s)
+	} else {
+		err := app.db.Get("settings", "settings", &s)
+		if err != nil {
+			log.Fatalf("Could not load the settings: %v\n", err)
+		}
+
+	}
+	// fmt.Printf("%+v\n", &s)
+	app.storage.RegisterAll(&s)
+	// fmt.Printf("%+v\n", app.storage.GetProviders())
+
+	// fmt.Println(app.storage.GetProviders())
+
+	app.storage.GetProvider("dropbox").ListFolder()
 
 }
 

@@ -33,6 +33,7 @@ func (s *Storage) UseProviders(viders ...Provider) {
 // Provider is an interface for the StorageProviders
 type Provider interface {
 	Name() string
+	ListFolder()
 }
 
 // Register a new Provider in storage map
@@ -65,4 +66,9 @@ func (s *Storage) ClearProviders() {
 // GetProviders returns the registered providers
 func (s *Storage) GetProviders() map[string]Provider {
 	return s.Providers
+}
+
+// GetProvider returns the registered providers
+func (s *Storage) GetProvider(p string) Provider {
+	return s.Providers[p]
 }

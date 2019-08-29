@@ -27,12 +27,12 @@ func (a *API) HandlerSaveSettings(w http.ResponseWriter, r *http.Request) error 
 		return err
 	}
 
-	err = a.db.Set("settings", "settings", &s)
+	err = a.db.Set("settings", "settings", s)
 	if err != nil {
 		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
-	a.storage.ClearProviders()
+	// a.storage.ClearProviders()
 	// for _, val := range s.StorageOptions {
 	// 	if val.Active {
 	// 		a.storage.Register(val.Option, val.Config)
