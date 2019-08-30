@@ -12,6 +12,7 @@ require (
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
 	github.com/dropbox/dropbox-sdk-go-unofficial v5.4.0+incompatible
+	github.com/dustin/go-humanize v1.0.0
 	github.com/go-kit/kit v0.9.0 // indirect
 	github.com/gobuffalo/flect v0.1.6 // indirect
 	github.com/gobuffalo/helpers v0.2.4 // indirect
@@ -36,6 +37,7 @@ require (
 	github.com/markbates/oncer v1.0.0 // indirect
 	github.com/markbates/refresh v1.8.0 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
+	github.com/mitchellh/ioprogress v0.0.0-20180201004757-6a23b12fa88e
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect

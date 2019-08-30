@@ -24,6 +24,11 @@ func (p *Provider) ListFolder() {
 	fmt.Println("TODO")
 }
 
+// Put returns google_drive
+func (p *Provider) Put(file string) {
+	fmt.Println("TODO " + file)
+}
+
 // New initializer for Provider struct ftp
 func New(cfg Config) *Provider {
 	return &Provider{}

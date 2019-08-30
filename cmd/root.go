@@ -6,6 +6,7 @@ import (
 	"gmail_backup/pkg/models"
 	"gmail_backup/pkg/storage"
 	"os"
+	"path/filepath"
 
 	"github.com/asdine/storm"
 	"github.com/labstack/gommon/log"
@@ -96,8 +97,14 @@ func initApp() {
 	// fmt.Printf("%+v\n", app.storage.GetProviders())
 
 	// fmt.Println(app.storage.GetProviders())
+	absFile, err := filepath.Abs("./dropbox.txt")
+	// fmt.Println(absFile)
+	if err != nil {
+		log.Fatalf("Could not find the file")
+	}
+	app.storage.GetProvider("dropbox").Put(absFile)
 
-	app.storage.GetProvider("dropbox").ListFolder()
+	// app.storage.GetProvider("dropbox").ListFolder()
 
 }
 

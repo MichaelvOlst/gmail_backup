@@ -34,6 +34,7 @@ func (s *Storage) UseProviders(viders ...Provider) {
 type Provider interface {
 	Name() string
 	ListFolder()
+	Put(file string)
 }
 
 // Register a new Provider in storage map
