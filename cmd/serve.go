@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gmail_backup/pkg/api"
+	"gmail_backup/pkg/gmail"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/packr"
+	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +33,13 @@ var serveCmd = &cobra.Command{
 		fmt.Printf("Running app on http://%s\n", addr)
 
 		box := packr.NewBox("./../public")
-		api := api.New(app.config, app.db, &box, app.storage)
+
+		g, err := gmail.New(app.config)
+		if err != nil {
+			log.Fatalf("Could not init gmail. error %v", err)
+		}
+
+		api := api.New(app.config, app.db, &box, app.storage, g)
 
 		server := &http.Server{
 			Addr:         addr,

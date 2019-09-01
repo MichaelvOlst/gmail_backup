@@ -6,10 +6,6 @@
     class="elevation-1"
   >
 
-    <template v-slot:item.attachments="{ item }">
-      <v-icon v-if="item.attachments">done</v-icon>
-      <v-icon v-else>clear</v-icon>
-    </template>
 
     <template v-slot:top>
       <v-toolbar flat color="white">
@@ -52,6 +48,16 @@
         </v-dialog>
       </v-toolbar>
     </template>
+
+    <template v-slot:item.attachments="{ item }">
+      <v-icon v-if="item.attachments">done</v-icon>
+      <v-icon v-else>clear</v-icon>
+    </template>
+
+    <template v-slot:item.backup="{ item }">
+      <v-icon small @click="backup(item)">backup</v-icon>
+    </template>
+
     <template v-slot:item.action="{ item }">
       <v-icon small class="mr-2" @click="editItem(item)">edit</v-icon>
       <v-icon small @click="deleteItem(item)">delete</v-icon>
@@ -61,7 +67,7 @@
 
 <script>
   import { mapGetters, mapState } from 'vuex'
-  import { GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT } from './../store/modules/types'  
+  import { GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT, BACKUP_ACCOUNT } from './../store/modules/types'  
   import { log } from 'util';
 
   export default {
@@ -76,7 +82,7 @@
         },
         { text: 'Attachments', value: 'attachments' },
         { text: 'Last date', value: 'backup_date' },
-        { text: 'percentage', value: 'percentage' },
+        { text: 'backup', value: 'backup' },
         { text: 'Actions', value: 'action', sortable: false },
       ],
       form: {
@@ -136,6 +142,19 @@
         this.form.encryption_key =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       },
 
+       async backup (item) {
+        if(!confirm("Are you sure?")) {
+          return
+        }
+
+        try {
+          let response = await this.$store.dispatch(BACKUP_ACCOUNT, item.id)
+          console.log(response)
+        } catch (e) {
+          console.log(e)
+        }
+      },
+
       async getAllAccounts() {
         try {
           let response = this.$store.dispatch(ALL_ACCOUNTS)
@@ -173,7 +192,6 @@
       },
 
       async save () {
-
         try {
           let response = await this.$store.dispatch(SAVE_ACCOUNT, this.form)
           this.form = {}

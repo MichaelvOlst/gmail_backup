@@ -1,4 +1,4 @@
-import {GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT} from './types';
+import {GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT, BACKUP_ACCOUNT} from './types';
 import axios from 'axios';
 
 const state = {
@@ -32,6 +32,17 @@ const actions = {
             return response
         } catch(error) {
             commit('account_error', error.response.data.error)
+            throw error.response.data.error
+        }
+    },
+
+    async [BACKUP_ACCOUNT]({commit}, id) {
+        try {
+            const response = await axios.post(`/api/backup/${id}`)
+            // commit('account_saved', response.result)
+            return response
+        } catch(error) {
+            // commit('account_error', error.response.data.error)
             throw error.response.data.error
         }
     },

@@ -2110,6 +2110,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 
 
@@ -2129,8 +2135,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         text: 'Last date',
         value: 'backup_date'
       }, {
-        text: 'percentage',
-        value: 'percentage'
+        text: 'backup',
+        value: 'backup'
       }, {
         text: 'Actions',
         value: 'action',
@@ -2206,14 +2212,60 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     generateKey: function generateKey() {
       this.form.encryption_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     },
-    getAllAccounts: function () {
-      var _getAllAccounts = _asyncToGenerator(
+    backup: function () {
+      var _backup = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2() {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(item) {
         var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
+              case 0:
+                if (confirm("Are you sure?")) {
+                  _context2.next = 2;
+                  break;
+                }
+
+                return _context2.abrupt("return");
+
+              case 2:
+                _context2.prev = 2;
+                _context2.next = 5;
+                return this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_2__["BACKUP_ACCOUNT"], item.id);
+
+              case 5:
+                response = _context2.sent;
+                console.log(response);
+                _context2.next = 12;
+                break;
+
+              case 9:
+                _context2.prev = 9;
+                _context2.t0 = _context2["catch"](2);
+                console.log(_context2.t0);
+
+              case 12:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[2, 9]]);
+      }));
+
+      function backup(_x) {
+        return _backup.apply(this, arguments);
+      }
+
+      return backup;
+    }(),
+    getAllAccounts: function () {
+      var _getAllAccounts = _asyncToGenerator(
+      /*#__PURE__*/
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3() {
+        var response;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 try {
                   response = this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_2__["ALL_ACCOUNTS"]);
@@ -2223,10 +2275,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
               case 1:
               case "end":
-                return _context2.stop();
+                return _context3.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee3, this);
       }));
 
       function getAllAccounts() {
@@ -2238,37 +2290,37 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     editItem: function () {
       var _editItem = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(item) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4(item) {
         var response;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
-                _context3.prev = 0;
-                _context3.next = 3;
+                _context4.prev = 0;
+                _context4.next = 3;
                 return this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_2__["GET_ACCOUNT"], item.id);
 
               case 3:
-                response = _context3.sent;
+                response = _context4.sent;
                 this.form = response;
                 this.dialog = true;
-                _context3.next = 11;
+                _context4.next = 11;
                 break;
 
               case 8:
-                _context3.prev = 8;
-                _context3.t0 = _context3["catch"](0);
-                console.log(_context3.t0.error);
+                _context4.prev = 8;
+                _context4.t0 = _context4["catch"](0);
+                console.log(_context4.t0.error);
 
               case 11:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3, this, [[0, 8]]);
+        }, _callee4, this, [[0, 8]]);
       }));
 
-      function editItem(_x) {
+      function editItem(_x2) {
         return _editItem.apply(this, arguments);
       }
 
@@ -2277,43 +2329,43 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     deleteItem: function () {
       var _deleteItem = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4(item) {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5(item) {
         var response;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
                 if (confirm("Are you sure?")) {
-                  _context4.next = 2;
+                  _context5.next = 2;
                   break;
                 }
 
-                return _context4.abrupt("return");
+                return _context5.abrupt("return");
 
               case 2:
-                _context4.prev = 2;
-                _context4.next = 5;
+                _context5.prev = 2;
+                _context5.next = 5;
                 return this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_2__["DELETE_ACCOUNT"], item.id);
 
               case 5:
-                response = _context4.sent;
+                response = _context5.sent;
                 this.getAllAccounts();
-                _context4.next = 11;
+                _context5.next = 11;
                 break;
 
               case 9:
-                _context4.prev = 9;
-                _context4.t0 = _context4["catch"](2);
+                _context5.prev = 9;
+                _context5.t0 = _context5["catch"](2);
 
               case 11:
               case "end":
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4, this, [[2, 9]]);
+        }, _callee5, this, [[2, 9]]);
       }));
 
-      function deleteItem(_x2) {
+      function deleteItem(_x3) {
         return _deleteItem.apply(this, arguments);
       }
 
@@ -2326,35 +2378,35 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     save: function () {
       var _save = _asyncToGenerator(
       /*#__PURE__*/
-      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5() {
+      _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6() {
         var response;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
-                _context5.prev = 0;
-                _context5.next = 3;
+                _context6.prev = 0;
+                _context6.next = 3;
                 return this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_2__["SAVE_ACCOUNT"], this.form);
 
               case 3:
-                response = _context5.sent;
+                response = _context6.sent;
                 this.form = {};
                 this.close();
                 this.getAllAccounts();
-                _context5.next = 12;
+                _context6.next = 12;
                 break;
 
               case 9:
-                _context5.prev = 9;
-                _context5.t0 = _context5["catch"](0);
-                this.errors = _context5.t0;
+                _context6.prev = 9;
+                _context6.t0 = _context6["catch"](0);
+                this.errors = _context6.t0;
 
               case 12:
               case "end":
-                return _context5.stop();
+                return _context6.stop();
             }
           }
-        }, _callee5, this, [[0, 9]]);
+        }, _callee6, this, [[0, 9]]);
       }));
 
       function save() {
@@ -5514,17 +5566,6 @@ var render = function() {
     },
     scopedSlots: _vm._u([
       {
-        key: "item.attachments",
-        fn: function(ref) {
-          var item = ref.item
-          return [
-            item.attachments
-              ? _c("v-icon", [_vm._v("done")])
-              : _c("v-icon", [_vm._v("clear")])
-          ]
-        }
-      },
-      {
         key: "top",
         fn: function() {
           return [
@@ -5775,6 +5816,37 @@ var render = function() {
           ]
         },
         proxy: true
+      },
+      {
+        key: "item.attachments",
+        fn: function(ref) {
+          var item = ref.item
+          return [
+            item.attachments
+              ? _c("v-icon", [_vm._v("done")])
+              : _c("v-icon", [_vm._v("clear")])
+          ]
+        }
+      },
+      {
+        key: "item.backup",
+        fn: function(ref) {
+          var item = ref.item
+          return [
+            _c(
+              "v-icon",
+              {
+                attrs: { small: "" },
+                on: {
+                  click: function($event) {
+                    return _vm.backup(item)
+                  }
+                }
+              },
+              [_vm._v("backup")]
+            )
+          ]
+        }
       },
       {
         key: "item.action",
@@ -59232,12 +59304,11 @@ var actions = (_actions = {}, _defineProperty(_actions, _types__WEBPACK_IMPORTED
   return function (_x2, _x3) {
     return _ref5.apply(this, arguments);
   };
-}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["ALL_ACCOUNTS"], function () {
+}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["BACKUP_ACCOUNT"], function () {
   var _ref7 = _asyncToGenerator(
   /*#__PURE__*/
-  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(_ref6, data) {
-    var commit, _ref8, _data;
-
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee3(_ref6, id) {
+    var commit, response;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -59245,86 +59316,84 @@ var actions = (_actions = {}, _defineProperty(_actions, _types__WEBPACK_IMPORTED
             commit = _ref6.commit;
             _context3.prev = 1;
             _context3.next = 4;
-            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/api/accounts');
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.post("/api/backup/".concat(id));
 
           case 4:
-            _ref8 = _context3.sent;
-            _data = _ref8.data;
-            commit('account_get', _data.result);
-            return _context3.abrupt("return", _data.result);
+            response = _context3.sent;
+            return _context3.abrupt("return", response);
 
-          case 10:
-            _context3.prev = 10;
+          case 8:
+            _context3.prev = 8;
             _context3.t0 = _context3["catch"](1);
-            commit('account_error', _context3.t0.response.data.error);
             throw _context3.t0.response.data.error;
 
-          case 14:
+          case 11:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, null, [[1, 10]]);
+    }, _callee3, null, [[1, 8]]);
   }));
 
   return function (_x4, _x5) {
     return _ref7.apply(this, arguments);
   };
-}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["GET_ACCOUNT"], function () {
-  var _ref10 = _asyncToGenerator(
+}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["ALL_ACCOUNTS"], function () {
+  var _ref9 = _asyncToGenerator(
   /*#__PURE__*/
-  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4(_ref9, id) {
-    var commit, _ref11, data;
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee4(_ref8, data) {
+    var commit, _ref10, _data;
 
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            commit = _ref9.commit;
+            commit = _ref8.commit;
             _context4.prev = 1;
             _context4.next = 4;
-            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/api/accounts/".concat(id));
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.get('/api/accounts');
 
           case 4:
-            _ref11 = _context4.sent;
-            data = _ref11.data;
-            return _context4.abrupt("return", data.result);
+            _ref10 = _context4.sent;
+            _data = _ref10.data;
+            commit('account_get', _data.result);
+            return _context4.abrupt("return", _data.result);
 
-          case 9:
-            _context4.prev = 9;
+          case 10:
+            _context4.prev = 10;
             _context4.t0 = _context4["catch"](1);
             commit('account_error', _context4.t0.response.data.error);
             throw _context4.t0.response.data.error;
 
-          case 13:
+          case 14:
           case "end":
             return _context4.stop();
         }
       }
-    }, _callee4, null, [[1, 9]]);
+    }, _callee4, null, [[1, 10]]);
   }));
 
   return function (_x6, _x7) {
-    return _ref10.apply(this, arguments);
+    return _ref9.apply(this, arguments);
   };
-}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["DELETE_ACCOUNT"], function () {
-  var _ref13 = _asyncToGenerator(
+}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["GET_ACCOUNT"], function () {
+  var _ref12 = _asyncToGenerator(
   /*#__PURE__*/
-  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5(_ref12, id) {
-    var commit, _ref14, data;
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee5(_ref11, id) {
+    var commit, _ref13, data;
 
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            commit = _ref12.commit;
+            commit = _ref11.commit;
             _context5.prev = 1;
             _context5.next = 4;
-            return axios__WEBPACK_IMPORTED_MODULE_2___default.a["delete"]("/api/accounts/".concat(id));
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a.get("/api/accounts/".concat(id));
 
           case 4:
-            _ref14 = _context5.sent;
-            data = _ref14.data;
+            _ref13 = _context5.sent;
+            data = _ref13.data;
             return _context5.abrupt("return", data.result);
 
           case 9:
@@ -59342,7 +59411,44 @@ var actions = (_actions = {}, _defineProperty(_actions, _types__WEBPACK_IMPORTED
   }));
 
   return function (_x8, _x9) {
-    return _ref13.apply(this, arguments);
+    return _ref12.apply(this, arguments);
+  };
+}()), _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["DELETE_ACCOUNT"], function () {
+  var _ref15 = _asyncToGenerator(
+  /*#__PURE__*/
+  _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee6(_ref14, id) {
+    var commit, _ref16, data;
+
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            commit = _ref14.commit;
+            _context6.prev = 1;
+            _context6.next = 4;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default.a["delete"]("/api/accounts/".concat(id));
+
+          case 4:
+            _ref16 = _context6.sent;
+            data = _ref16.data;
+            return _context6.abrupt("return", data.result);
+
+          case 9:
+            _context6.prev = 9;
+            _context6.t0 = _context6["catch"](1);
+            commit('account_error', _context6.t0.response.data.error);
+            throw _context6.t0.response.data.error;
+
+          case 13:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6, null, [[1, 9]]);
+  }));
+
+  return function (_x10, _x11) {
+    return _ref15.apply(this, arguments);
   };
 }()), _actions);
 var mutations = {
@@ -59618,7 +59724,7 @@ var mutations = {
 /*!*********************************************!*\
   !*** ./resources/js/store/modules/types.js ***!
   \*********************************************/
-/*! exports provided: CHECK_AUTH, LOGIN, LOGOUT, GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT, GET_SETTINGS, SAVE_SETTINGS, NOTIFY */
+/*! exports provided: CHECK_AUTH, LOGIN, LOGOUT, GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT, BACKUP_ACCOUNT, GET_SETTINGS, SAVE_SETTINGS, NOTIFY */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -59631,6 +59737,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ALL_ACCOUNTS", function() { return ALL_ACCOUNTS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GET_ACCOUNT", function() { return GET_ACCOUNT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DELETE_ACCOUNT", function() { return DELETE_ACCOUNT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BACKUP_ACCOUNT", function() { return BACKUP_ACCOUNT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GET_SETTINGS", function() { return GET_SETTINGS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SAVE_SETTINGS", function() { return SAVE_SETTINGS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NOTIFY", function() { return NOTIFY; });
@@ -59642,6 +59749,7 @@ var SAVE_ACCOUNT = "saveAccount";
 var ALL_ACCOUNTS = "allAccounts";
 var GET_ACCOUNT = "getAccount";
 var DELETE_ACCOUNT = "deleteAccount";
+var BACKUP_ACCOUNT = "backupAccount";
 var GET_SETTINGS = "getSettings";
 var SAVE_SETTINGS = "saveSettings";
 var NOTIFY = "notify";
