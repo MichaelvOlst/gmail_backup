@@ -1,24 +1,57 @@
 package gmail
 
 import (
-	"context"
+	"fmt"
 	"gmail_backup/pkg/models"
+	"log"
 
-	"golang.org/x/oauth2"
+	"google.golang.org/api/googleapi"
+
+	"google.golang.org/api/gmail/v1"
 )
 
 // Backup recieves an account to backup
-func (g *Gmail) Backup(ac *models.Account) (*oauth2.Token, error) {
+func (g *Gmail) Backup(ac *models.Account) error {
 
-	token, err := g.AuthConfig.Exchange(context.TODO(), ac.GoogleToken)
+	client, err := g.getClient(ac)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	_ = client
+
+	api, err := gmail.New(client)
+	if err != nil {
+		log.Fatalf("Unable to retrieve Gmail client: %v", err)
 	}
 
-	return token, err
+	user := "me"
 
-	// client := g.AuthConfig.Client(context.Background(), ac.GoogleToken.(*oauth2.Token))
+	r, err := api.Users.Messages.List(user).Do()
 
-	// return nil
+	if err != nil {
+		log.Fatalf("Unable to retrieve messages: %v", err)
+	}
+	if len(r.Messages) == 0 {
+		fmt.Println("No labels found.")
+		return nil
+	}
+
+	for _, l := range r.Messages {
+		m, err := api.Users.Messages.Get(user, l.Id).Do(format("raw"))
+		if err != nil {
+			log.Fatalf("Unable to retrieve message: %v", err)
+		}
+
+		fmt.Println(m.Raw)
+		break
+	}
+
+	return nil
 
 }
+
+func format(f string) googleapi.CallOption { return formatMessage(f) }
+
+type formatMessage string
+
+func (f formatMessage) Get() (string, string) { return "format", string(f) }

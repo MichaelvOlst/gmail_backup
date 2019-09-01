@@ -34,7 +34,7 @@ var serveCmd = &cobra.Command{
 
 		box := packr.NewBox("./../public")
 
-		g, err := gmail.New(app.config)
+		g, err := gmail.New(app.config, app.db)
 		if err != nil {
 			log.Fatalf("Could not init gmail. error %v", err)
 		}

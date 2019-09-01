@@ -23,10 +23,10 @@ func (a *API) HandlerBackupAccount(w http.ResponseWriter, r *http.Request) error
 		return respond(w, http.StatusNotFound, envelope{Error: "Could find an account with this Id"})
 	}
 
-	t, err := a.gmail.Backup(ac)
+	err = a.gmail.Backup(ac)
 	if err != nil {
 		return respond(w, http.StatusUnprocessableEntity, envelope{Error: fmt.Sprintf("Unable to authenticate: %v", err)})
 	}
 
-	return respond(w, http.StatusOK, envelope{Result: t})
+	return respond(w, http.StatusOK, envelope{Result: ac})
 }
