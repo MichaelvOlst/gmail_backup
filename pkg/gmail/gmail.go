@@ -6,8 +6,8 @@ import (
 	"gmail_backup/pkg/database"
 	"gmail_backup/pkg/models"
 	"io/ioutil"
-	"net/http"
 
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
@@ -37,7 +37,6 @@ func New(cfg *config.Config, db *database.Store) (*Gmail, error) {
 	g.AuthConfig = authCfg
 	g.config = cfg
 	g.db = db
-
 	return g, nil
 }
 
@@ -46,8 +45,8 @@ func (g *Gmail) GetAuthCodeURL() string {
 	return g.AuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 }
 
-// getClient gets the client for the given user and saves the token for the given user and saves it if it has been changed
-func (g *Gmail) getClient(ac *models.Account) (*http.Client, error) {
+// GetClient gets the client for the given user and saves the token for the given user and saves it if it has been changed
+func (g *Gmail) GetClient(ac *models.Account) (*gmail.Service, error) {
 
 	if ac.OauthToken == nil && ac.GoogleToken != "" {
 		t, err := g.AuthConfig.Exchange(context.TODO(), ac.GoogleToken)
@@ -75,5 +74,11 @@ func (g *Gmail) getClient(ac *models.Account) (*http.Client, error) {
 	}
 
 	client := oauth2.NewClient(oauth2.NoContext, tokenSource)
-	return client, nil
+
+	api, err := gmail.New(client)
+	if err != nil {
+		return nil, errors.Errorf("Unable to retrieve Gmail client: %v", err)
+	}
+
+	return api, nil
 }

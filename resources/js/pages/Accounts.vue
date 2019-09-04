@@ -147,12 +147,40 @@
           return
         }
 
-        try {
-          let response = await this.$store.dispatch(BACKUP_ACCOUNT, item.id)
-          console.log(response)
-        } catch (e) {
-          console.log(e)
-        }
+        let websocket = new WebSocket(`ws:/${window.location.host}/api/backup/${item.id}`);
+        console.log("Attempting Connection...");
+
+        websocket.onopen = function(event) {
+          console.log("Successfully connected to websocket server");
+        };
+
+        websocket.onerror = function(error) {
+          console.log("Error connecting to websocket server");
+          console.log(error);
+          websocket.close();
+        };
+
+        websocket.onmessage = function(event) {
+          // parse the event data sent from our websocket server
+          let data = JSON.parse(event.data);
+
+          if (data.error) {
+            alert(`Error occured: ${data.error}`)
+            websocket.close()
+            return
+          }
+
+          // populate our `sub` element with the total subscriber counter for our
+          // channel
+          console.log(data)
+        };
+
+        // try {
+        //   let response = await this.$store.dispatch(BACKUP_ACCOUNT, item.id)
+        //   console.log(response)
+        // } catch (e) {
+        //   console.log(e)
+        // }
       },
 
       async getAllAccounts() {

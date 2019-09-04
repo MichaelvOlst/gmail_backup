@@ -25,7 +25,7 @@ func (a *API) Routes() *mux.Router {
 	r.Handle("/api/accounts/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerUpdateAccount))).Methods(http.MethodPatch)
 	r.Handle("/api/accounts/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerDeleteAccount))).Methods(http.MethodDelete)
 
-	r.Handle("/api/backup/{id:[0-9]+}", a.Authorize(HandlerFunc(a.HandlerBackupAccount))).Methods(http.MethodPost)
+	r.Handle("/api/backup/{id:[0-9]+}", a.Authorize(HandlerWSFunc(a.HandlerBackupAccount)))
 
 	spa := spaHandler{staticPath: "public/", indexPath: "index.html", box: a.box}
 	r.PathPrefix("/").Handler(spa)

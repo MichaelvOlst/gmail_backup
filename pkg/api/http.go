@@ -24,6 +24,13 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// WSHandler is our custom HTTP WSHandler with error returns
+type WSHandler func(w http.ResponseWriter, r *http.Request)
+
+func (h WSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h(w, r)
+}
+
 // HandleError handles errors
 func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	logrus.WithFields(logrus.Fields{
@@ -46,6 +53,11 @@ func respond(w http.ResponseWriter, statusCode int, d interface{}) error {
 // HandlerFunc takes a custom Handler func and converts it to http.HandlerFunc
 func HandlerFunc(fn Handler) http.HandlerFunc {
 	return http.HandlerFunc(Handler(fn).ServeHTTP)
+}
+
+// HandlerWSFunc takes a custom Handler func and converts it to http.HandlerFunc
+func HandlerWSFunc(fn WSHandler) http.HandlerFunc {
+	return http.HandlerFunc(WSHandler(fn).ServeHTTP)
 }
 
 // ServeFileHandler serves the file to the browser

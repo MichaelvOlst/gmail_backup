@@ -15,17 +15,7 @@ import (
 )
 
 // Backup recieves an account to backup
-func (g *Gmail) Backup(ac *models.Account) (bool, error) {
-
-	client, err := g.getClient(ac)
-	if err != nil {
-		return false, err
-	}
-
-	api, err := gmail.New(client)
-	if err != nil {
-		return false, errors.Errorf("Unable to retrieve Gmail client: %v", err)
-	}
+func (g *Gmail) Backup(api *gmail.Service, ac *models.Account) (bool, error) {
 
 	path := fmt.Sprintf("%s/%s", strings.TrimLeft(g.config.Backup.Path, "/"), ac.Email)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -49,13 +39,11 @@ func (g *Gmail) Backup(ac *models.Account) (bool, error) {
 
 	if r.NextPageToken != "" {
 
-		fmt.Println("next set")
-
 		counter := 0
 		nextPageToken := r.NextPageToken
 		for {
 
-			if counter == 100 {
+			if counter == 0 {
 				break
 			}
 
@@ -79,85 +67,37 @@ func (g *Gmail) Backup(ac *models.Account) (bool, error) {
 	}
 
 	// return false, nil
-	// fmt.Println(len(lm))
-	// fmt.Println("")
+	fmt.Println(len(lm))
+	fmt.Println("")
 
 	if len(lm) == 0 {
 		return false, errors.New("No messages found")
 	}
 
-	ch := make(chan message, len(lm))
-	defer close(ch)
-
 	for _, m := range lm {
 		fmt.Printf("Getting message with id: %s\n", m.Id)
-		go func(api *gmail.Service, user string, m *gmail.Message, ch chan<- message) {
 
-			var err error
-			md, err := api.Users.Messages.Get(user, m.Id).Do(formatMessage("raw"))
-			if err != nil {
-				ch <- message{
-					id:      m.Id,
-					snippet: m.Snippet,
-					err:     err,
-				}
-			} else {
-				ch <- message{
-					id:           m.Id,
-					internalDate: md.InternalDate,
-					snippet:      md.Snippet,
-					raw:          md.Raw,
-				}
-			}
-
-		}(api, user, m, ch)
-	}
-
-	for m := range ch {
-		if m.err != nil {
-			fmt.Printf("SHow me the error %v\n", m.err)
-		} else {
-			err = g.saveMessage(path, m)
-			if err != nil {
-				return false, err
-			}
+		md, err := api.Users.Messages.Get(user, m.Id).Do(formatMessage("raw"))
+		if err != nil {
+			return false, err
 		}
 
+		err = g.saveMessage(path, md)
+		if err != nil {
+			return false, err
+		}
 	}
 
 	fmt.Println("Done")
 
-	// for _, l := range r.Messages {
-	// 	go saveMessage()
-
-	// 	m, err := api.Users.Messages.Get(user, l.Id).Do(formatMessage("raw"))
-	// 	if err != nil {
-	// 		return false, errors.Errorf("Unable to retrieve message: %v", err)
-	// 	}
-
-	// 	err = g.saveMessage(path, m)
-	// 	if err != nil {
-	// 		return false, err
-	// 	}
-	// 	break
-	// }
-
 	return true, nil
 }
 
-type message struct {
-	id           string
-	internalDate int64
-	snippet      string
-	raw          string
-	err          error
-}
-
-func (g *Gmail) saveMessage(path string, m message) error {
+func (g *Gmail) saveMessage(path string, m *gmail.Message) error {
 
 	b, _ := g.decodeMessage(m)
 
-	t := time.Unix(m.internalDate/1000, 0)
+	t := time.Unix(m.InternalDate/1000, 0)
 
 	path = fmt.Sprintf("%s/%s", path, t.Format("2006-01"))
 
@@ -165,7 +105,7 @@ func (g *Gmail) saveMessage(path string, m message) error {
 		os.Mkdir(path, 0777)
 	}
 
-	filename := fmt.Sprintf("%s/%s.eml", path, m.id)
+	filename := fmt.Sprintf("%s/%s.eml", path, m.Id)
 	fmt.Println(filename)
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
 	if err != nil {
@@ -181,8 +121,8 @@ func (g *Gmail) saveMessage(path string, m message) error {
 	return nil
 }
 
-func (g *Gmail) decodeMessage(m message) ([]byte, error) {
-	return base64.RawURLEncoding.DecodeString(m.raw)
+func (g *Gmail) decodeMessage(m *gmail.Message) ([]byte, error) {
+	return base64.RawURLEncoding.DecodeString(m.Raw)
 }
 
 func formatMessage(f string) googleapi.CallOption { return formatRequestMessage(f) }
