@@ -45,8 +45,8 @@ func (g *Gmail) GetAuthCodeURL() string {
 	return g.AuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 }
 
-// GetClient gets the client for the given user and saves the token for the given user and saves it if it has been changed
-func (g *Gmail) GetClient(ac *models.Account) (*gmail.Service, error) {
+// getClient gets the client for the given user and saves the token for the given user and saves it if it has been changed
+func (g *Gmail) getClient(ac *models.Account) (*gmail.Service, error) {
 
 	if ac.OauthToken == nil && ac.GoogleToken != "" {
 		t, err := g.AuthConfig.Exchange(context.TODO(), ac.GoogleToken)

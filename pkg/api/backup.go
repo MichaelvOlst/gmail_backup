@@ -1,10 +1,12 @@
 package api
 
 import (
+	"fmt"
 	"gmail_backup/pkg/models"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -43,6 +45,8 @@ func (a *API) HandlerBackupAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	go a.gmail.Backup(ac)
+
 	go a.writer(ws, ac)
 
 	// ac, err := a.db.GetAccountByID(id)
@@ -62,29 +66,23 @@ func (a *API) HandlerBackupAccount(w http.ResponseWriter, r *http.Request) {
 
 func (a *API) writer(conn *websocket.Conn, ac *models.Account) {
 
-	client, err := a.gmail.GetClient(ac)
-	if err != nil {
-		conn.WriteJSON(envelope{Error: err})
-		return
+	for {
+		ticker := time.NewTicker(1 * time.Second)
+		for range ticker.C {
+
+			ab, err := a.db.GetAccountByID(ac.ID)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			// and finally we write this JSON string to our WebSocket
+			// connection and record any errors if there has been any
+			if err := conn.WriteJSON(ab); err != nil {
+				fmt.Println(err)
+				conn.Close()
+				return
+			}
+		}
 	}
-
-	_ = client
-	// for {
-	// 	ticker := time.NewTicker(2 * time.Second)
-	// 	for range ticker.C {
-
-	// 		_, err := a.gmail.Backup(client, ac)
-	// 		if err != nil {
-	// 			conn.WriteJSON(envelope{Error: err})
-	// 			return
-	// 		}
-
-	// 		// and finally we write this JSON string to our WebSocket
-	// 		// connection and record any errors if there has been any
-	// 		if err := conn.WriteJSON(backupResult); err != nil {
-	// 			fmt.Println(err)
-	// 			return
-	// 		}
-	// 	}
-	// }
 }

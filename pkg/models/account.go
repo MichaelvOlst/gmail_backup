@@ -10,14 +10,15 @@ import (
 
 // Account is the model for accounts
 type Account struct {
-	ID             int           `json:"id" storm:"id,increment"`
-	Email          string        `json:"email" storm:"unique"`
-	EncryptionKey  string        `json:"encryption_key"`
-	Attachments    bool          `json:"attachments"`
-	BackupComplete bool          `json:"backup_complete"`
-	BackupDate     time.Time     `json:"backup_date"`
-	GoogleToken    string        `json:"google_token"`
-	OauthToken     *oauth2.Token `json:"token"`
+	ID                int           `json:"id" storm:"id,increment"`
+	Email             string        `json:"email" storm:"unique"`
+	EncryptionKey     string        `json:"encryption_key"`
+	Attachments       bool          `json:"attachments"`
+	BackupComplete    bool          `json:"backup_complete"`
+	BackupDate        time.Time     `json:"backup_date"`
+	BackupProgressMsg string        `json:"backup_progress_message"`
+	GoogleToken       string        `json:"google_token"`
+	OauthToken        *oauth2.Token `json:"token"`
 }
 
 // Validate the account model

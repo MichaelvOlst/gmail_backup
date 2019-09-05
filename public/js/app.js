@@ -2116,6 +2116,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 
 
@@ -2248,13 +2254,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
                   if (data.error) {
                     alert("Error occured: ".concat(data.error));
+                    item.backup_progress_message = data.error;
                     websocket.close();
                     return;
-                  } // populate our `sub` element with the total subscriber counter for our
+                  }
+
+                  if (data.backup_progress_message == "done") {
+                    alert("Done");
+                    item.backup_progress_message = data.backup_progress_message;
+                    websocket.close();
+                    return;
+                  }
+
+                  item.backup_progress_message = data.backup_progress_message; // populate our `sub` element with the total subscriber counter for our
                   // channel
-
-
-                  console.log(data);
+                  // console.log(data)
                 }; // try {
                 //   let response = await this.$store.dispatch(BACKUP_ACCOUNT, item.id)
                 //   console.log(response)
@@ -5576,215 +5590,245 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("v-data-table", {
-    staticClass: "elevation-1",
-    attrs: {
-      headers: _vm.headers,
-      items: _vm.accounts,
-      "no-data-text": "No accounts have been created yet"
-    },
-    scopedSlots: _vm._u([
-      {
-        key: "top",
-        fn: function() {
-          return [
-            _c(
-              "v-toolbar",
-              { attrs: { flat: "", color: "white" } },
-              [
+  return _c(
+    "div",
+    [
+      _c("v-data-table", {
+        staticClass: "elevation-1",
+        attrs: {
+          headers: _vm.headers,
+          items: _vm.accounts,
+          "no-data-text": "No accounts have been created yet"
+        },
+        scopedSlots: _vm._u([
+          {
+            key: "top",
+            fn: function() {
+              return [
                 _c(
-                  "v-dialog",
-                  {
-                    attrs: { "max-width": "1000px" },
-                    scopedSlots: _vm._u([
-                      {
-                        key: "activator",
-                        fn: function(ref) {
-                          var on = ref.on
-                          return [
-                            _c(
-                              "v-btn",
-                              _vm._g(
-                                {
-                                  staticClass: "mb-2",
-                                  attrs: { color: "primary", dark: "" }
-                                },
-                                on
-                              ),
-                              [_vm._v("New account")]
-                            )
-                          ]
-                        }
-                      }
-                    ]),
-                    model: {
-                      value: _vm.dialog,
-                      callback: function($$v) {
-                        _vm.dialog = $$v
-                      },
-                      expression: "dialog"
-                    }
-                  },
+                  "v-toolbar",
+                  { attrs: { flat: "", color: "white" } },
                   [
-                    _vm._v(" "),
                     _c(
-                      "v-card",
-                      [
-                        _c("v-card-title", [
-                          _c("span", { staticClass: "headline" }, [
-                            _vm._v(_vm._s(_vm.formTitle))
-                          ])
+                      "v-dialog",
+                      {
+                        attrs: { "max-width": "1000px" },
+                        scopedSlots: _vm._u([
+                          {
+                            key: "activator",
+                            fn: function(ref) {
+                              var on = ref.on
+                              return [
+                                _c(
+                                  "v-btn",
+                                  _vm._g(
+                                    {
+                                      staticClass: "mb-2",
+                                      attrs: { color: "primary", dark: "" }
+                                    },
+                                    on
+                                  ),
+                                  [_vm._v("New account")]
+                                )
+                              ]
+                            }
+                          }
                         ]),
+                        model: {
+                          value: _vm.dialog,
+                          callback: function($$v) {
+                            _vm.dialog = $$v
+                          },
+                          expression: "dialog"
+                        }
+                      },
+                      [
                         _vm._v(" "),
                         _c(
-                          "v-card-text",
+                          "v-card",
                           [
+                            _c("v-card-title", [
+                              _c("span", { staticClass: "headline" }, [
+                                _vm._v(_vm._s(_vm.formTitle))
+                              ])
+                            ]),
+                            _vm._v(" "),
                             _c(
-                              "v-container",
-                              { attrs: { "grid-list-md": "" } },
+                              "v-card-text",
                               [
                                 _c(
-                                  "v-layout",
-                                  { attrs: { wrap: "" } },
+                                  "v-container",
+                                  { attrs: { "grid-list-md": "" } },
                                   [
                                     _c(
-                                      "v-flex",
-                                      {
-                                        attrs: { xs12: "", sm12: "", md12: "" }
-                                      },
+                                      "v-layout",
+                                      { attrs: { wrap: "" } },
                                       [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            error: _vm.errors.email !== null,
-                                            "error-messages": _vm.errors.email,
-                                            label: "Emailaddress",
-                                            required: ""
-                                          },
-                                          model: {
-                                            value: _vm.form.email,
-                                            callback: function($$v) {
-                                              _vm.$set(_vm.form, "email", $$v)
-                                            },
-                                            expression: "form.email"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      {
-                                        attrs: { xs12: "", sm12: "", md12: "" }
-                                      },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            error:
-                                              _vm.errors.encryption_key !==
-                                              null,
-                                            "error-messages":
-                                              _vm.errors.encryption_key,
-                                            label: "Encryption key",
-                                            required: ""
-                                          },
-                                          model: {
-                                            value: _vm.form.encryption_key,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.form,
-                                                "encryption_key",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "form.encryption_key"
-                                          }
-                                        }),
-                                        _vm._v(" "),
                                         _c(
-                                          "a",
+                                          "v-flex",
                                           {
                                             attrs: {
-                                              href: "#",
-                                              target: "blank"
-                                            },
-                                            on: {
-                                              click: function($event) {
-                                                $event.preventDefault()
-                                                return _vm.generateKey()
-                                              }
+                                              xs12: "",
+                                              sm12: "",
+                                              md12: ""
                                             }
                                           },
-                                          [_vm._v("Generate key")]
-                                        )
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      {
-                                        attrs: { xs12: "", sm12: "", md12: "" }
-                                      },
-                                      [
-                                        _c("v-text-field", {
-                                          attrs: {
-                                            error:
-                                              _vm.errors.google_token !== null,
-                                            "error-messages":
-                                              _vm.errors.google_token,
-                                            label: "Google token",
-                                            required: ""
-                                          },
-                                          model: {
-                                            value: _vm.form.google_token,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.form,
-                                                "google_token",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "form.google_token"
-                                          }
-                                        }),
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                error:
+                                                  _vm.errors.email !== null,
+                                                "error-messages":
+                                                  _vm.errors.email,
+                                                label: "Emailaddress",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.form.email,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.form,
+                                                    "email",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "form.email"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
                                         _vm._v(" "),
-                                        _vm.getTokenURL
-                                          ? _c(
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: {
+                                              xs12: "",
+                                              sm12: "",
+                                              md12: ""
+                                            }
+                                          },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                error:
+                                                  _vm.errors.encryption_key !==
+                                                  null,
+                                                "error-messages":
+                                                  _vm.errors.encryption_key,
+                                                label: "Encryption key",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.form.encryption_key,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.form,
+                                                    "encryption_key",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "form.encryption_key"
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            _c(
                                               "a",
                                               {
                                                 attrs: {
-                                                  href: _vm.getTokenURL,
+                                                  href: "#",
                                                   target: "blank"
+                                                },
+                                                on: {
+                                                  click: function($event) {
+                                                    $event.preventDefault()
+                                                    return _vm.generateKey()
+                                                  }
                                                 }
                                               },
-                                              [_vm._v("Get token")]
+                                              [_vm._v("Generate key")]
                                             )
-                                          : _vm._e()
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "v-flex",
-                                      {
-                                        attrs: { xs12: "", sm12: "", md12: "" }
-                                      },
-                                      [
-                                        _c("v-switch", {
-                                          attrs: { label: "Attachments" },
-                                          model: {
-                                            value: _vm.form.attachments,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                _vm.form,
-                                                "attachments",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "form.attachments"
-                                          }
-                                        })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: {
+                                              xs12: "",
+                                              sm12: "",
+                                              md12: ""
+                                            }
+                                          },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                error:
+                                                  _vm.errors.google_token !==
+                                                  null,
+                                                "error-messages":
+                                                  _vm.errors.google_token,
+                                                label: "Google token",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.form.google_token,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.form,
+                                                    "google_token",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "form.google_token"
+                                              }
+                                            }),
+                                            _vm._v(" "),
+                                            _vm.getTokenURL
+                                              ? _c(
+                                                  "a",
+                                                  {
+                                                    attrs: {
+                                                      href: _vm.getTokenURL,
+                                                      target: "blank"
+                                                    }
+                                                  },
+                                                  [_vm._v("Get token")]
+                                                )
+                                              : _vm._e()
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: {
+                                              xs12: "",
+                                              sm12: "",
+                                              md12: ""
+                                            }
+                                          },
+                                          [
+                                            _c("v-switch", {
+                                              attrs: { label: "Attachments" },
+                                              model: {
+                                                value: _vm.form.attachments,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.form,
+                                                    "attachments",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "form.attachments"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
                                       ],
                                       1
                                     )
@@ -5793,32 +5837,32 @@ var render = function() {
                                 )
                               ],
                               1
-                            )
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "v-card-actions",
-                          [
-                            _c("v-spacer"),
-                            _vm._v(" "),
-                            _c(
-                              "v-btn",
-                              {
-                                attrs: { color: "blue darken-1", text: "" },
-                                on: { click: _vm.close }
-                              },
-                              [_vm._v("Cancel")]
                             ),
                             _vm._v(" "),
                             _c(
-                              "v-btn",
-                              {
-                                attrs: { color: "blue darken-1", text: "" },
-                                on: { click: _vm.save }
-                              },
-                              [_vm._v("Save")]
+                              "v-card-actions",
+                              [
+                                _c("v-spacer"),
+                                _vm._v(" "),
+                                _c(
+                                  "v-btn",
+                                  {
+                                    attrs: { color: "blue darken-1", text: "" },
+                                    on: { click: _vm.close }
+                                  },
+                                  [_vm._v("Cancel")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "v-btn",
+                                  {
+                                    attrs: { color: "blue darken-1", text: "" },
+                                    on: { click: _vm.save }
+                                  },
+                                  [_vm._v("Save")]
+                                )
+                              ],
+                              1
                             )
                           ],
                           1
@@ -5829,80 +5873,88 @@ var render = function() {
                   ],
                   1
                 )
-              ],
-              1
-            )
-          ]
-        },
-        proxy: true
-      },
-      {
-        key: "item.attachments",
-        fn: function(ref) {
-          var item = ref.item
-          return [
-            item.attachments
-              ? _c("v-icon", [_vm._v("done")])
-              : _c("v-icon", [_vm._v("clear")])
-          ]
-        }
-      },
-      {
-        key: "item.backup",
-        fn: function(ref) {
-          var item = ref.item
-          return [
-            _c(
-              "v-icon",
-              {
-                attrs: { small: "" },
-                on: {
-                  click: function($event) {
-                    return _vm.backup(item)
-                  }
-                }
-              },
-              [_vm._v("backup")]
-            )
-          ]
-        }
-      },
-      {
-        key: "item.action",
-        fn: function(ref) {
-          var item = ref.item
-          return [
-            _c(
-              "v-icon",
-              {
-                staticClass: "mr-2",
-                attrs: { small: "" },
-                on: {
-                  click: function($event) {
-                    return _vm.editItem(item)
-                  }
-                }
-              },
-              [_vm._v("edit")]
-            ),
-            _vm._v(" "),
-            _c(
-              "v-icon",
-              {
-                attrs: { small: "" },
-                on: {
-                  click: function($event) {
-                    return _vm.deleteItem(item)
-                  }
-                }
-              },
-              [_vm._v("delete")]
-            )
-          ]
-        }
-      }
-    ])
-  })
+              ]
+            },
+            proxy: true
+          },
+          {
+            key: "item.attachments",
+            fn: function(ref) {
+              var item = ref.item
+              return [
+                item.attachments
+                  ? _c("v-icon", [_vm._v("done")])
+                  : _c("v-icon", [_vm._v("clear")])
+              ]
+            }
+          },
+          {
+            key: "item.backup",
+            fn: function(ref) {
+              var item = ref.item
+              return [
+                _c(
+                  "v-layout",
+                  { attrs: { "justify-space-between": "" } },
+                  [
+                    _c(
+                      "v-icon",
+                      {
+                        attrs: { small: "" },
+                        on: {
+                          click: function($event) {
+                            return _vm.backup(item)
+                          }
+                        }
+                      },
+                      [_vm._v("backup")]
+                    ),
+                    _vm._v(_vm._s(item.backup_progress_message) + "\n    ")
+                  ],
+                  1
+                )
+              ]
+            }
+          },
+          {
+            key: "item.action",
+            fn: function(ref) {
+              var item = ref.item
+              return [
+                _c(
+                  "v-icon",
+                  {
+                    staticClass: "mr-2",
+                    attrs: { small: "" },
+                    on: {
+                      click: function($event) {
+                        return _vm.editItem(item)
+                      }
+                    }
+                  },
+                  [_vm._v("edit")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "v-icon",
+                  {
+                    attrs: { small: "" },
+                    on: {
+                      click: function($event) {
+                        return _vm.deleteItem(item)
+                      }
+                    }
+                  },
+                  [_vm._v("delete")]
+                )
+              ]
+            }
+          }
+        ])
+      })
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true

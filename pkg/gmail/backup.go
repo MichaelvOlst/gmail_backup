@@ -15,7 +15,13 @@ import (
 )
 
 // Backup recieves an account to backup
-func (g *Gmail) Backup(api *gmail.Service, ac *models.Account) (bool, error) {
+func (g *Gmail) Backup(ac *models.Account) {
+
+	api, err := g.getClient(ac)
+	if err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not connect to gmail: %v", err))
+		return
+	}
 
 	path := fmt.Sprintf("%s/%s", strings.TrimLeft(g.config.Backup.Path, "/"), ac.Email)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -26,13 +32,17 @@ func (g *Gmail) Backup(api *gmail.Service, ac *models.Account) (bool, error) {
 
 	var lm []*gmail.Message
 
+	g.db.SaveAccountResult(ac, "Getting messages...")
+
 	r, err := api.Users.Messages.List(user).Do()
 	if err != nil {
-		return false, errors.Errorf("Unable to retrieve messages: %v", err)
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+		return
 	}
 
 	if len(r.Messages) == 0 {
-		return false, errors.New("No messages found")
+		g.db.SaveAccountResult(ac, "No messages found")
+		return
 	}
 
 	lm = append(lm, r.Messages...)
@@ -43,15 +53,16 @@ func (g *Gmail) Backup(api *gmail.Service, ac *models.Account) (bool, error) {
 		nextPageToken := r.NextPageToken
 		for {
 
-			if counter == 0 {
+			if counter == 1 {
 				break
 			}
 
-			fmt.Printf("Getting next messages %d\n", counter)
+			g.db.SaveAccountResult(ac, fmt.Sprintf("Getting messages %d", len(lm)))
 			r, err := api.Users.Messages.List(user).Do(pageToken(nextPageToken))
 
 			if err != nil {
-				return false, errors.Errorf("Unable to retrieve messages: %v", err)
+				g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+				return
 			}
 
 			if r.NextPageToken == "" || len(r.Messages) == 0 {
@@ -66,31 +77,33 @@ func (g *Gmail) Backup(api *gmail.Service, ac *models.Account) (bool, error) {
 		}
 	}
 
-	// return false, nil
-	fmt.Println(len(lm))
-	fmt.Println("")
+	// // return false, nil
+	// fmt.Println(len(lm))
+	// fmt.Println("")
 
 	if len(lm) == 0 {
-		return false, errors.New("No messages found")
+		g.db.SaveAccountResult(ac, "No messages found")
+		return
 	}
 
-	for _, m := range lm {
-		fmt.Printf("Getting message with id: %s\n", m.Id)
+	totalMsg := len(lm)
+	g.db.SaveAccountResult(ac, fmt.Sprintf("Total messages %d", totalMsg))
+
+	for k, m := range lm {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("%d / %d", k, totalMsg))
 
 		md, err := api.Users.Messages.Get(user, m.Id).Do(formatMessage("raw"))
 		if err != nil {
-			return false, err
+			g.db.SaveAccountResult(ac, fmt.Sprintf("Could not retrieve message with the id %s: %v", m.Id, err))
 		}
 
 		err = g.saveMessage(path, md)
 		if err != nil {
-			return false, err
+			g.db.SaveAccountResult(ac, fmt.Sprintf("Could not save message with the id %s: %v", m.Id, err))
 		}
 	}
 
-	fmt.Println("Done")
-
-	return true, nil
+	g.db.SaveAccountResult(ac, "Done")
 }
 
 func (g *Gmail) saveMessage(path string, m *gmail.Message) error {

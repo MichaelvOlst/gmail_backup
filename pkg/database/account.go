@@ -52,3 +52,13 @@ func (s *Store) UpdateTokenAccount(ac *models.Account, t *oauth2.Token) error {
 	}
 	return nil
 }
+
+// SaveAccountResult saves backup progress for the given account
+func (s *Store) SaveAccountResult(ac *models.Account, r string) error {
+	ac.BackupProgressMsg = r
+	err := s.Update(ac)
+	if err != nil {
+		return err
+	}
+	return nil
+}

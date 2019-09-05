@@ -1,11 +1,14 @@
 <template>
+
+
+  <div>
+     <!-- {{ accounts }} -->
   <v-data-table
     :headers="headers"
     :items="accounts"
     no-data-text="No accounts have been created yet"
     class="elevation-1"
   >
-
 
     <template v-slot:top>
       <v-toolbar flat color="white">
@@ -55,7 +58,9 @@
     </template>
 
     <template v-slot:item.backup="{ item }">
-      <v-icon small @click="backup(item)">backup</v-icon>
+      <v-layout justify-space-between>
+        <v-icon small @click="backup(item)">backup</v-icon>{{ item.backup_progress_message }}
+      </v-layout>
     </template>
 
     <template v-slot:item.action="{ item }">
@@ -63,6 +68,7 @@
       <v-icon small @click="deleteItem(item)">delete</v-icon>
     </template>
   </v-data-table>
+  </div>
 </template>
 
 <script>
@@ -166,13 +172,23 @@
 
           if (data.error) {
             alert(`Error occured: ${data.error}`)
+            item.backup_progress_message = data.error
             websocket.close()
             return
           }
 
+          if(data.backup_progress_message == "done") {
+            alert("Done")
+            item.backup_progress_message = data.backup_progress_message
+            websocket.close()
+            return
+          }
+
+          item.backup_progress_message = data.backup_progress_message
+
           // populate our `sub` element with the total subscriber counter for our
           // channel
-          console.log(data)
+          // console.log(data)
         };
 
         // try {
