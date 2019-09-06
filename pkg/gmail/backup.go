@@ -23,6 +23,12 @@ func (g *Gmail) Backup(ac *models.Account) {
 		return
 	}
 
+	labels, err := g.getUserLabels(api)
+	if err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not get user labels: %v", err))
+		return
+	}
+
 	path := fmt.Sprintf("%s/%s", strings.TrimLeft(g.config.Backup.Path, "/"), ac.Email)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, 0777)
@@ -34,51 +40,58 @@ func (g *Gmail) Backup(ac *models.Account) {
 
 	g.db.SaveAccountResult(ac, "Getting messages...")
 
-	r, err := api.Users.Messages.List(user).Do()
-	if err != nil {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
-		return
-	}
+	for _, label := range labels {
 
-	if len(r.Messages) == 0 {
-		g.db.SaveAccountResult(ac, "No messages found")
-		return
-	}
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Getting messages for label: %s", label))
 
-	lm = append(lm, r.Messages...)
+		r, err := api.Users.Messages.List(user).LabelIds(label).Do()
+		if err != nil {
+			g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+			return
+		}
 
-	if r.NextPageToken != "" {
+		if len(r.Messages) == 0 {
+			g.db.SaveAccountResult(ac, fmt.Sprintf("No messages found with the label: %s", label))
+			continue
+		}
 
-		counter := 0
-		nextPageToken := r.NextPageToken
-		for {
+		lm = append(lm, r.Messages...)
 
-			if counter == 1 {
-				break
+		if r.NextPageToken != "" {
+
+			counter := 0
+			nextPageToken := r.NextPageToken
+			for {
+
+				// if counter == 1 {
+				// 	break
+				// }
+
+				g.db.SaveAccountResult(ac, fmt.Sprintf("Getting messages %d", len(lm)))
+				r, err := api.Users.Messages.List(user).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
+
+				if err != nil {
+					g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+					return
+				}
+
+				if r.NextPageToken == "" || len(r.Messages) == 0 {
+					break
+				}
+
+				nextPageToken = r.NextPageToken
+
+				lm = append(lm, r.Messages...)
+
+				counter++
 			}
-
-			g.db.SaveAccountResult(ac, fmt.Sprintf("Getting messages %d", len(lm)))
-			r, err := api.Users.Messages.List(user).Do(pageToken(nextPageToken))
-
-			if err != nil {
-				g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
-				return
-			}
-
-			if r.NextPageToken == "" || len(r.Messages) == 0 {
-				break
-			}
-
-			nextPageToken = r.NextPageToken
-
-			lm = append(lm, r.Messages...)
-
-			counter++
 		}
 	}
 
 	// // return false, nil
 	// fmt.Println(len(lm))
+	// return
+
 	// fmt.Println("")
 
 	if len(lm) == 0 {
@@ -143,9 +156,3 @@ func formatMessage(f string) googleapi.CallOption { return formatRequestMessage(
 type formatRequestMessage string
 
 func (f formatRequestMessage) Get() (string, string) { return "format", string(f) }
-
-func pageToken(f string) googleapi.CallOption { return pageTokenOption(f) }
-
-type pageTokenOption string
-
-func (f pageTokenOption) Get() (string, string) { return "pageToken", string(f) }
