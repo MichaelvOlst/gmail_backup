@@ -1,7 +1,6 @@
 package gmail
 
 import (
-	"compress/flate"
 	"encoding/base64"
 	"fmt"
 	"gmail_backup/pkg/models"
@@ -14,7 +13,6 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/api/googleapi"
 
-	"github.com/mholt/archiver"
 	"google.golang.org/api/gmail/v1"
 )
 
@@ -43,69 +41,66 @@ func (g *Gmail) Backup(ac *models.Account) {
 	// var lm []*gmail.Message
 	lm := make(map[string]*gmail.Message)
 
-	g.db.SaveAccountResult(ac, "Getting messages...")
+	g.db.SaveAccountResult(ac, "Collecting messages")
 
-	_ = labels
-	// for _, label := range labels {
+	for _, label := range labels {
 
-	label := "INBOX"
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Getting messages for label: %s", label))
 
-	g.db.SaveAccountResult(ac, fmt.Sprintf("Getting messages for label: %s", label))
+		r, err := api.Users.Messages.List(user).IncludeSpamTrash(false).LabelIds(label).Do()
+		if err != nil {
+			g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+			return
+		}
 
-	r, err := api.Users.Messages.List(user).IncludeSpamTrash(false).LabelIds(label).Do()
-	if err != nil {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
-		return
-	}
+		if len(r.Messages) == 0 {
+			g.db.SaveAccountResult(ac, fmt.Sprintf("No messages found with the label: %s", label))
+			continue
+		}
 
-	if len(r.Messages) == 0 {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("No messages found with the label: %s", label))
-		// continue
-	}
+		for _, m := range r.Messages {
+			if _, ok := lm[m.Id]; !ok {
+				lm[m.Id] = m
+			}
+		}
 
-	for _, m := range r.Messages {
-		if _, ok := lm[m.Id]; !ok {
-			lm[m.Id] = m
+		// lm = append(lm, r.Messages...)
+
+		if r.NextPageToken != "" {
+
+			counter := 0
+			nextPageToken := r.NextPageToken
+			for {
+
+				// if counter == 0 {
+				// 	break
+				// }
+
+				g.db.SaveAccountResult(ac, fmt.Sprintf("Messages: %d", len(lm)))
+				r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
+
+				if err != nil {
+					g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+					return
+				}
+
+				if r.NextPageToken == "" || len(r.Messages) == 0 {
+					break
+				}
+
+				nextPageToken = r.NextPageToken
+
+				// lm = append(lm, r.Messages...)
+				for _, m := range r.Messages {
+					if _, ok := lm[m.Id]; !ok {
+						lm[m.Id] = m
+					}
+				}
+
+				counter++
+			}
 		}
 	}
-
-	// lm = append(lm, r.Messages...)
-
-	// if r.NextPageToken != "" {
-
-	// 	counter := 0
-	// 	nextPageToken := r.NextPageToken
-	// 	for {
-
-	// 		if counter == 0 {
-	// 			break
-	// 		}
-
-	// 		g.db.SaveAccountResult(ac, fmt.Sprintf("Total messages: %d", len(lm)))
-	// 		r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
-
-	// 		if err != nil {
-	// 			g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
-	// 			return
-	// 		}
-
-	// 		if r.NextPageToken == "" || len(r.Messages) == 0 {
-	// 			break
-	// 		}
-
-	// 		nextPageToken = r.NextPageToken
-
-	// 		// lm = append(lm, r.Messages...)
-	// 		for _, m := range r.Messages {
-	// 			if _, ok := lm[m.Id]; !ok {
-	// 				lm[m.Id] = m
-	// 			}
-	// 		}
-
-	// 		counter++
-	// 	}
-	// }
-	// }
 
 	// // return false, nil
 	// fmt.Println(len(lm))
@@ -147,22 +142,26 @@ func (g *Gmail) Backup(ac *models.Account) {
 
 	g.db.SaveAccountResult(ac, "Zipping messages")
 
-	z := archiver.Zip{
-		CompressionLevel:       flate.DefaultCompression,
-		MkdirAll:               true,
-		SelectiveCompression:   true,
-		ContinueOnError:        false,
-		OverwriteExisting:      false,
-		ImplicitTopLevelFolder: false,
-	}
 	root := userPath
-	zipPath := userPath + "/test.zip"
-	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			return z.Archive([]string{path}, zipPath)
+	zipPath := fmt.Sprintf("%s/%s.zip", userPath, ac.Email)
+
+	if _, err := os.Stat(zipPath); err == nil {
+		err = os.Remove(zipPath)
+		if err != nil {
+			g.db.SaveAccountResult(ac, fmt.Sprintf("Couldn't remove existing zip file: %v", err))
+
 		}
-		return nil
+
+	}
+
+	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Zipping file: %s", path))
+
+		return g.archiver.Archive([]string{path}, zipPath)
 	})
+
+	g.db.SaveAccountResult(ac, "Done")
+
 }
 
 func (g *Gmail) saveMessage(path string, m *gmail.Message) error {

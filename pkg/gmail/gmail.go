@@ -7,6 +7,8 @@ import (
 	"gmail_backup/pkg/models"
 	"io/ioutil"
 
+	"github.com/mholt/archiver"
+
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -18,6 +20,7 @@ type Gmail struct {
 	AuthConfig *oauth2.Config
 	config     *config.Config
 	db         *database.Store
+	archiver   *archiver.Zip
 }
 
 // New init the Gmail struct and returns it
@@ -37,6 +40,8 @@ func New(cfg *config.Config, db *database.Store) (*Gmail, error) {
 	g.AuthConfig = authCfg
 	g.config = cfg
 	g.db = db
+	g.archiver = archiver.NewZip()
+
 	return g, nil
 }
 
