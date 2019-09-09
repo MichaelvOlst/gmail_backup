@@ -2122,6 +2122,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -2135,8 +2142,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         sortable: true,
         value: 'email'
       }, {
-        text: 'Attachments',
-        value: 'attachments'
+        text: 'Storage',
+        value: 'storage_provider'
       }, {
         text: 'Last date',
         value: 'backup_date'
@@ -2152,7 +2159,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         email: '',
         encryption_key: '',
         attachments: true,
-        google_token: ''
+        google_token: '',
+        storage_provider: null
       },
       errors: {
         email: null,
@@ -2168,6 +2176,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapGetters"])(['getTokenURL']), {}, Object(vuex__WEBPACK_IMPORTED_MODULE_1__["mapState"])({
     accounts: function accounts(state) {
       return state.accounts.accounts;
+    },
+    settings: function settings(state) {
+      return state.settings;
     }
   })),
   watch: {
@@ -2187,7 +2198,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     var _created = _asyncToGenerator(
     /*#__PURE__*/
     _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-      var response;
+      var response, _response;
+
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -2198,9 +2210,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 console.log(e);
               }
 
+              try {
+                _response = this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_2__["GET_SETTINGS"]);
+              } catch (e) {
+                console.log(e);
+              }
+
               this.getAllAccounts();
 
-            case 2:
+            case 3:
             case "end":
               return _context.stop();
           }
@@ -2215,6 +2233,20 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     return created;
   }(),
   methods: {
+    getActiveStorage: function getActiveStorage(item) {
+      var options = this.settings.active_storage_options;
+      var providerName = null;
+
+      for (var index = 0; index < options.length; index++) {
+        var provider = options[index];
+
+        if (provider.option == item.storage_provider) {
+          providerName = provider.name;
+        }
+      }
+
+      return providerName || "Unknown";
+    },
     generateKey: function generateKey() {
       this.form.encryption_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     },
@@ -2406,7 +2438,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }(),
     close: function close() {
       this.dialog = false;
-      this.form = {};
+      this.form = {
+        email: '',
+        encryption_key: '',
+        attachments: true,
+        google_token: '',
+        storage_provider: null
+      };
     },
     save: function () {
       var _save = _asyncToGenerator(
@@ -2423,23 +2461,29 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
               case 3:
                 response = _context6.sent;
-                this.form = {};
+                // this.form = {
+                //   email: '',
+                //   encryption_key: '',
+                //   attachments: true,
+                //   google_token: '',
+                //   storage_provider: null,
+                // }
                 this.close();
                 this.getAllAccounts();
-                _context6.next = 12;
+                _context6.next = 11;
                 break;
 
-              case 9:
-                _context6.prev = 9;
+              case 8:
+                _context6.prev = 8;
                 _context6.t0 = _context6["catch"](0);
                 this.errors = _context6.t0;
 
-              case 12:
+              case 11:
               case "end":
                 return _context6.stop();
             }
           }
-        }, _callee6, this, [[0, 9]]);
+        }, _callee6, this, [[0, 8]]);
       }));
 
       function save() {
@@ -2575,7 +2619,6 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-//
 //
 //
 //
@@ -5812,18 +5855,27 @@ var render = function() {
                                             }
                                           },
                                           [
-                                            _c("v-switch", {
-                                              attrs: { label: "Attachments" },
+                                            _c("v-select", {
+                                              attrs: {
+                                                items:
+                                                  _vm.settings
+                                                    .active_storage_options,
+                                                "item-text": "name",
+                                                "item-value": "option",
+                                                label: "Storage option"
+                                              },
                                               model: {
-                                                value: _vm.form.attachments,
+                                                value:
+                                                  _vm.form.storage_provider,
                                                 callback: function($$v) {
                                                   _vm.$set(
                                                     _vm.form,
-                                                    "attachments",
+                                                    "storage_provider",
                                                     $$v
                                                   )
                                                 },
-                                                expression: "form.attachments"
+                                                expression:
+                                                  "form.storage_provider"
                                               }
                                             })
                                           ],
@@ -5878,13 +5930,11 @@ var render = function() {
             proxy: true
           },
           {
-            key: "item.attachments",
+            key: "item.storage_provider",
             fn: function(ref) {
               var item = ref.item
               return [
-                item.attachments
-                  ? _c("v-icon", [_vm._v("done")])
-                  : _c("v-icon", [_vm._v("clear")])
+                _c("div", [_vm._v(_vm._s(_vm.getActiveStorage(item)) + " ")])
               ]
             }
           },
@@ -59275,14 +59325,6 @@ __webpack_require__.r(__webpack_exports__);
 
 var _actions;
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -59529,8 +59571,7 @@ var mutations = {
   google_token_error: function google_token_error(state) {
     state.tokenURL = "";
   },
-  account_saved: function account_saved(state, account) {
-    state.accounts = [].concat(_toConsumableArray(state.accounts), [account]);
+  account_saved: function account_saved(state, account) {// state.accounts = [...state.accounts, account];
   },
   account_get: function account_get(state, accounts) {
     state.accounts = accounts;
@@ -59696,6 +59737,7 @@ var state = {
   settings: {
     storage_options: {}
   },
+  active_storage_options: [],
   error: null
 };
 var actions = (_actions = {}, _defineProperty(_actions, _types__WEBPACK_IMPORTED_MODULE_1__["GET_SETTINGS"], function () {
@@ -59778,6 +59820,17 @@ var actions = (_actions = {}, _defineProperty(_actions, _types__WEBPACK_IMPORTED
 var mutations = {
   set_settings: function set_settings(state, settings) {
     state.settings = settings;
+    var storage_options = [];
+
+    for (var provider in settings.storage_options) {
+      var element = settings.storage_options[provider];
+      storage_options.push({
+        option: element.StorageOption.option,
+        name: element.StorageOption.name
+      });
+    }
+
+    state.active_storage_options = storage_options;
   },
   set_settings_error: function set_settings_error(state, error) {
     state.error = error;

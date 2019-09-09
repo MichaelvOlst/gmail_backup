@@ -3,6 +3,8 @@
 
   <div>
      <!-- {{ accounts }} -->
+
+     <!-- {{ settings.active_storage_options }} -->
   <v-data-table
     :headers="headers"
     :items="accounts"
@@ -36,8 +38,14 @@
                     <a v-if="getTokenURL" :href="getTokenURL" target="blank">Get token</a>
                   </v-flex>
                   <v-flex xs12 sm12 md12>
-                    <v-switch v-model="form.attachments" label="Attachments"></v-switch>
-                  </v-flex>
+                    <v-select
+                      :items="settings.active_storage_options"
+                      item-text="name"
+                      item-value="option"
+                      label="Storage option"
+                      v-model="form.storage_provider"
+                    ></v-select>
+                  </v-flex>                  
                 </v-layout>
               </v-container>  
             </v-card-text>
@@ -52,9 +60,8 @@
       </v-toolbar>
     </template>
 
-    <template v-slot:item.attachments="{ item }">
-      <v-icon v-if="item.attachments">done</v-icon>
-      <v-icon v-else>clear</v-icon>
+    <template v-slot:item.storage_provider="{ item }">
+      <div>{{ getActiveStorage(item) }} </div>
     </template>
 
     <template v-slot:item.backup="{ item }">
@@ -73,7 +80,7 @@
 
 <script>
   import { mapGetters, mapState } from 'vuex'
-  import { GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT, BACKUP_ACCOUNT } from './../store/modules/types'  
+  import { GOOGLE_URL, SAVE_ACCOUNT, ALL_ACCOUNTS, GET_ACCOUNT, DELETE_ACCOUNT, BACKUP_ACCOUNT, GET_SETTINGS } from './../store/modules/types'  
   import { log } from 'util';
 
   export default {
@@ -86,7 +93,7 @@
           sortable: true,
           value: 'email',
         },
-        { text: 'Attachments', value: 'attachments' },
+        { text: 'Storage', value: 'storage_provider' },
         { text: 'Last date', value: 'backup_date' },
         { text: 'backup', value: 'backup' },
         { text: 'Actions', value: 'action', sortable: false },
@@ -96,6 +103,7 @@
         encryption_key: '',
         attachments: true,
         google_token: '',
+        storage_provider: null,
       },
       errors: {
         email: null,
@@ -113,8 +121,10 @@
       ]),
       ...mapState({
         accounts: state => state.accounts.accounts,
+        settings: state => state.settings,
       }),
     },
+
 
     watch: {
       dialog (val) {
@@ -139,13 +149,32 @@
         console.log(e);
       }
 
+      try {
+        let response = this.$store.dispatch(GET_SETTINGS)  
+      } catch (e) {
+        console.log(e);
+      }
+
       this.getAllAccounts()
     },
 
     methods: {
 
+      getActiveStorage (item) {       
+
+        const options = this.settings.active_storage_options
+        let providerName = null
+        for (let index = 0; index < options.length; index++) {
+          const provider = options[index];
+          if (provider.option == item.storage_provider) {
+            providerName = provider.name
+          }
+        }
+        return providerName || "Unknown"
+      },
+
       generateKey() {
-        this.form.encryption_key =  Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        this.form.encryption_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       },
 
        async backup (item) {
@@ -232,13 +261,25 @@
 
       close () {
         this.dialog = false
-        this.form = {}
+        this.form = {
+          email: '',
+          encryption_key: '',
+          attachments: true,
+          google_token: '',
+          storage_provider: null,
+        }
       },
 
       async save () {
         try {
           let response = await this.$store.dispatch(SAVE_ACCOUNT, this.form)
-          this.form = {}
+          // this.form = {
+          //   email: '',
+          //   encryption_key: '',
+          //   attachments: true,
+          //   google_token: '',
+          //   storage_provider: null,
+          // }
           this.close();
           this.getAllAccounts()
         } catch(err) {          

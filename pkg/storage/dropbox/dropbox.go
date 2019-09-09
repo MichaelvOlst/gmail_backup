@@ -103,8 +103,7 @@ func (p *Provider) Put(file string) {
 }
 
 func uploadChunked(dbx files.Client, r io.Reader, commitInfo *files.CommitInfo, sizeTotal int64) (err error) {
-	res, err := dbx.UploadSessionStart(files.NewUploadSessionStartArg(),
-		&io.LimitedReader{R: r, N: chunkSize})
+	res, err := dbx.UploadSessionStart(files.NewUploadSessionStartArg(), &io.LimitedReader{R: r, N: chunkSize})
 	if err != nil {
 		return
 	}

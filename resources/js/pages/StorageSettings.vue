@@ -30,7 +30,6 @@
               required
             ></v-text-field>
 
-
             <v-text-field v-for="(value, key) in Object.keys(settings.storage_options[provider].Config)" :key="key"
               v-model="settings.storage_options[provider].Config[value]"
               :label="value"

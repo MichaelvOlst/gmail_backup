@@ -45,7 +45,7 @@ func (a *API) HandlerBackupAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go a.gmail.Backup(ac)
+	go a.gmail.Backup(ac, a.storage)
 
 	go a.writer(ws, ac)
 

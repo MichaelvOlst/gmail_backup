@@ -93,7 +93,7 @@ const mutations = {
     },
 
     account_saved(state, account) {
-        state.accounts = [...state.accounts, account];
+        // state.accounts = [...state.accounts, account];
     },
 
     account_get(state, accounts) {
