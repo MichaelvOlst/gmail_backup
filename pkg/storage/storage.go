@@ -5,6 +5,9 @@ import (
 	"gmail_backup/pkg/storage/drive"
 	"gmail_backup/pkg/storage/dropbox"
 	"gmail_backup/pkg/storage/ftp"
+	"io"
+
+	"github.com/pkg/errors"
 )
 
 // Storage handles the storage options
@@ -34,7 +37,7 @@ func (s *Storage) UseProviders(viders ...Provider) {
 type Provider interface {
 	Name() string
 	ListFolder()
-	Put(file string)
+	Put(file, path string, r io.Reader)
 }
 
 // Register a new Provider in storage map
@@ -70,6 +73,11 @@ func (s *Storage) GetProviders() map[string]Provider {
 }
 
 // GetProvider returns the registered providers
-func (s *Storage) GetProvider(p string) Provider {
-	return s.Providers[p]
+func (s *Storage) GetProvider(p string) (Provider, error) {
+	provider, ok := s.Providers[p]
+	if ok {
+		return provider, nil
+	}
+
+	return nil, errors.Errorf("Provider %s not initialised", p)
 }

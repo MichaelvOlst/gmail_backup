@@ -3,14 +3,17 @@ package gmail
 import (
 	"encoding/base64"
 	"fmt"
+	"gmail_backup/pkg/database"
 	"gmail_backup/pkg/models"
 	"gmail_backup/pkg/storage"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/pkg/errors"
 	"google.golang.org/api/googleapi"
 
@@ -31,6 +34,12 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 	// 	g.db.SaveAccountResult(ac, fmt.Sprintf("Could not get user labels: %v", err))
 	// 	return
 	// }
+
+	storage, err := s.GetProvider(ac.StorageProvider)
+	if err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("%v", err))
+		return
+	}
 
 	userPath := fmt.Sprintf("%s/%s", strings.TrimLeft(g.config.Backup.Path, "/"), ac.Email)
 	if _, err := os.Stat(userPath); os.IsNotExist(err) {
@@ -144,7 +153,8 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 	g.db.SaveAccountResult(ac, "Zipping messages")
 
 	root := userPath
-	zipPath := fmt.Sprintf("%s/%s.zip", userPath, ac.Email)
+	t := time.Now()
+	zipPath := fmt.Sprintf("%s/%s-%s.zip", userPath, ac.Email, t.Format("2006-01-02"))
 
 	if _, err := os.Stat(zipPath); err == nil {
 		err = os.Remove(zipPath)
@@ -153,11 +163,8 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 		}
 	}
 
-	g.db.SaveAccountResult(ac, "Zipping files")
-	i := 0
+	g.db.SaveAccountResult(ac, "Zipping messages..")
 	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("Zipping file: %d", i))
-		i++
 		return g.archiver.Archive([]string{path}, zipPath)
 	})
 	// if err != nil {
@@ -165,11 +172,62 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 	// 	return
 	// }
 
-	storage := s.GetProvider(ac.StorageProvider)
-	storage.Put(zipPath)
+	g.db.SaveAccountResult(ac, fmt.Sprintf("Saving %s to %s", filepath.Base(zipPath), storage.Name()))
+
+	contents, err := os.Open(zipPath)
+	if err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not open file: %v", err))
+		return
+	}
+	defer contents.Close()
+
+	contentsInfo, err := contents.Stat()
+	if err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not get file info: %v", err))
+		return
+	}
+
+	r := &progressReader{
+		Reader:    contents,
+		TotalSize: contentsInfo.Size(),
+		db:        g.db,
+		account:   ac,
+	}
+
+	// progressbar := &ioprogress.Reader{
+	// 	Reader: contents,
+	// 	DrawFunc: ioprogress.DrawTerminalf(os.Stdout, func(progress, total int64) string {
+	// 		ur := fmt.Sprintf("Uploading %s/%s", humanize.Bytes(uint64(progress)), humanize.Bytes(uint64(total)))
+	// 		return ur
+	// 	}),
+	// 	Size: contentsInfo.Size(),
+	// }
+
+	storage.Put(zipPath, ac.UploadPath, r)
 
 	g.db.SaveAccountResult(ac, "Done")
 
+}
+
+type progressReader struct {
+	io.Reader
+	written   int64 // Total # of bytes transferred
+	TotalSize int64
+	db        *database.Store
+	account   *models.Account
+}
+
+// Read 'overrides' the underlying io.Reader's Read method.
+// This is the one that will be called by io.Copy(). We simply
+// use it to keep track of byte counts and then forward the call.
+func (pr *progressReader) Read(p []byte) (int, error) {
+	n, err := pr.Reader.Read(p)
+	if err == nil {
+		pr.written += int64(n)
+		ur := fmt.Sprintf("Uploading %s/%s", humanize.Bytes(uint64(pr.written)), humanize.Bytes(uint64(pr.TotalSize)))
+		pr.db.SaveAccountResult(pr.account, ur)
+	}
+	return n, err
 }
 
 func (g *Gmail) saveMessage(path string, m *gmail.Message) error {

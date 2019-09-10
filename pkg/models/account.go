@@ -19,6 +19,7 @@ type Account struct {
 	GoogleToken       string        `json:"google_token"`
 	OauthToken        *oauth2.Token `json:"token"`
 	StorageProvider   string        `json:"storage_provider"`
+	UploadPath        string        `json:"upload_path"`
 }
 
 // Validate the account model

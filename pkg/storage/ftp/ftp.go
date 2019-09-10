@@ -1,6 +1,9 @@
 package ftp
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 const name = "ftp"
 
@@ -25,7 +28,7 @@ func (p *Provider) ListFolder() {
 }
 
 // Put returns google_drive
-func (p *Provider) Put(file string) {
+func (p *Provider) Put(file, path string, r io.Reader) {
 	fmt.Println("TODO " + file)
 }
 

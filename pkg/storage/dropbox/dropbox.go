@@ -10,8 +10,6 @@ import (
 
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
-	"github.com/dustin/go-humanize"
-	"github.com/mitchellh/ioprogress"
 )
 
 const name = "dropbox"
@@ -57,7 +55,7 @@ func (p *Provider) ListFolder() {
 }
 
 // Put stores a file in Dropbox
-func (p *Provider) Put(file string) {
+func (p *Provider) Put(file, path string, r io.Reader) {
 
 	// fmt.Println("TODO " + file)
 	contents, err := os.Open(file)
@@ -71,15 +69,6 @@ func (p *Provider) Put(file string) {
 		return
 	}
 
-	progressbar := &ioprogress.Reader{
-		Reader: contents,
-		DrawFunc: ioprogress.DrawTerminalf(os.Stderr, func(progress, total int64) string {
-			return fmt.Sprintf("Uploading %s/%s",
-				humanize.IBytes(uint64(progress)), humanize.IBytes(uint64(total)))
-		}),
-		Size: contentsInfo.Size(),
-	}
-
 	// fmt.Println(filepath.Base(file))
 
 	commitInfo := files.NewCommitInfo("/backup/" + filepath.Base(file))
@@ -90,13 +79,14 @@ func (p *Provider) Put(file string) {
 
 	dbx := p.client
 	if contentsInfo.Size() > chunkSize {
-		err = uploadChunked(dbx, progressbar, commitInfo, contentsInfo.Size())
+		err = uploadChunked(dbx, r, commitInfo, contentsInfo.Size())
 		if err != nil {
 			log.Fatal(err)
 		}
+		return
 	}
 
-	if _, err = dbx.Upload(commitInfo, progressbar); err != nil {
+	if _, err = dbx.Upload(commitInfo, r); err != nil {
 		log.Fatal(err)
 		return
 	}
