@@ -24,9 +24,6 @@ type Config struct {
 	Google struct {
 		File string `default:"credentials.json"`
 	}
-	Backup struct {
-		Path string `default:"data"`
-	}
 }
 
 // Load loads the config file
@@ -80,14 +77,6 @@ func Parse() (*Config, error) {
 	if cfg.Server.Secret == "" {
 		cfg.Server.Secret = randomString(40)
 	}
-
-	backupPath, _ := filepath.Abs(cfg.Backup.Path)
-
-	if _, err := os.Stat(backupPath); os.IsNotExist(err) {
-		os.Mkdir(backupPath, 0777)
-	}
-
-	// cfg.Backup.Path = backupPath
 
 	return &cfg, nil
 }

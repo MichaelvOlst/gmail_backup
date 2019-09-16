@@ -2,7 +2,7 @@ package drive
 
 import (
 	"fmt"
-	"io"
+	"os"
 )
 
 const name = "google_drive"
@@ -28,8 +28,27 @@ func (p *Provider) ListFolder() {
 }
 
 // Put returns google_drive
-func (p *Provider) Put(file, path string, r io.Reader) {
-	fmt.Println("TODO " + file)
+func (p *Provider) Put(filename, path string, file *os.File) {
+	fmt.Println("TODO " + filename)
+}
+
+// Mkdir returns google_drive
+func (p *Provider) Mkdir(path string) error {
+	fmt.Println("TODO " + path)
+	return nil
+}
+
+// IsNotExists check if a folder already exists
+func (p *Provider) IsNotExists(err error) bool {
+	return false
+	// cerr, ok := err.(files.CreateFolderAPIError)
+	// if !ok {
+	// 	return false
+	// }
+
+	// if cerr.APIError.Error() == "path/conflict/folder/" {
+	// 	return true
+	// }
 }
 
 // New initializer for Provider struct ftp

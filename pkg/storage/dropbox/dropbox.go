@@ -5,7 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
@@ -55,23 +55,17 @@ func (p *Provider) ListFolder() {
 }
 
 // Put stores a file in Dropbox
-func (p *Provider) Put(file, path string, r io.Reader) {
+func (p *Provider) Put(filename, path string, file *os.File) {
 
-	// fmt.Println("TODO " + file)
-	contents, err := os.Open(file)
-	if err != nil {
-		return
-	}
-	defer contents.Close()
-
-	contentsInfo, err := contents.Stat()
+	contentsInfo, err := file.Stat()
 	if err != nil {
 		return
 	}
 
-	// fmt.Println(filepath.Base(file))
+	fmt.Println("filename: " + filename)
+	fmt.Println("path: " + path)
 
-	commitInfo := files.NewCommitInfo("/backup/" + filepath.Base(file))
+	commitInfo := files.NewCommitInfo(path + filename)
 	commitInfo.Mode.Tag = "overwrite"
 
 	// The Dropbox API only accepts timestamps in UTC with second precision.
@@ -79,14 +73,14 @@ func (p *Provider) Put(file, path string, r io.Reader) {
 
 	dbx := p.client
 	if contentsInfo.Size() > chunkSize {
-		err = uploadChunked(dbx, r, commitInfo, contentsInfo.Size())
+		err = uploadChunked(dbx, file, commitInfo, contentsInfo.Size())
 		if err != nil {
 			log.Fatal(err)
 		}
 		return
 	}
 
-	if _, err = dbx.Upload(commitInfo, r); err != nil {
+	if _, err = dbx.Upload(commitInfo, file); err != nil {
 		log.Fatal(err)
 		return
 	}
@@ -119,6 +113,33 @@ func uploadChunked(dbx files.Client, r io.Reader, commitInfo *files.CommitInfo, 
 	}
 
 	return
+}
+
+// Mkdir creates a folder in dropbox
+func (p *Provider) Mkdir(path string) error {
+	arg := files.NewCreateFolderArg(path)
+
+	_, err := p.client.CreateFolderV2(arg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// IsNotExists check if a folder already exists
+func (p *Provider) IsNotExists(err error) bool {
+	cerr, ok := err.(files.CreateFolderAPIError)
+	if !ok {
+		return false
+	}
+
+	fmt.Println(cerr.APIError)
+
+	if strings.Contains(cerr.APIError.Error(), "path/conflict/folder/") {
+		return true
+	}
+
+	return false
 }
 
 // New initializer for Provider struct ftp

@@ -101,10 +101,9 @@ func initApp() {
 	// if err != nil {
 	// 	log.Fatalf("Could not find the file")
 	// }
-	// app.storage.GetProvider("dropbox").Put(absFile)
-
-	// app.storage.GetProvider("dropbox").ListFolder()
-
+	// p, _ := app.storage.GetProvider("dropbox")
+	// p.Mkdir("/test")
+	// p.Put("dropbox.txt", "/test/")
 }
 
 var rootCmd = &cobra.Command{

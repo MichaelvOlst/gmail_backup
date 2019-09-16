@@ -5,7 +5,7 @@ import (
 	"gmail_backup/pkg/storage/drive"
 	"gmail_backup/pkg/storage/dropbox"
 	"gmail_backup/pkg/storage/ftp"
-	"io"
+	"os"
 
 	"github.com/pkg/errors"
 )
@@ -37,7 +37,9 @@ func (s *Storage) UseProviders(viders ...Provider) {
 type Provider interface {
 	Name() string
 	ListFolder()
-	Put(file, path string, r io.Reader)
+	Put(filename, path string, file *os.File)
+	Mkdir(path string) error
+	IsNotExists(err error) bool
 }
 
 // Register a new Provider in storage map
