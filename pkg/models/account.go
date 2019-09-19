@@ -42,5 +42,14 @@ func (a *Account) Validate() map[string]string {
 			v["email"] = "Enter an valid email"
 		}
 	}
+
+	if strings.TrimSpace(a.StorageProvider) == "" {
+		v["storage_provider"] = "Storage option is required"
+	}
+
+	if strings.TrimSpace(a.UploadPath) == "" {
+		v["upload_path"] = "Upload path is required"
+	}
+
 	return v
 }

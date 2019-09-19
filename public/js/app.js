@@ -2129,6 +2129,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -2165,7 +2172,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       errors: {
         email: null,
         encryption_key: null,
-        google_token: null
+        google_token: null,
+        upload_path: null,
+        storage_provider: null
       }
     };
   },
@@ -5855,6 +5864,42 @@ var render = function() {
                                             }
                                           },
                                           [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                error:
+                                                  _vm.errors.upload_path !==
+                                                  null,
+                                                "error-messages":
+                                                  _vm.errors.upload_path,
+                                                label: "Upload path",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.form.upload_path,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.form,
+                                                    "upload_path",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression: "form.upload_path"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: {
+                                              xs12: "",
+                                              sm12: "",
+                                              md12: ""
+                                            }
+                                          },
+                                          [
                                             _c("v-select", {
                                               attrs: {
                                                 items:
@@ -5862,7 +5907,12 @@ var render = function() {
                                                     .active_storage_options,
                                                 "item-text": "name",
                                                 "item-value": "option",
-                                                label: "Storage option"
+                                                label: "Storage option",
+                                                error:
+                                                  _vm.errors.upload_path !==
+                                                  null,
+                                                "error-messages":
+                                                  _vm.errors.upload_path
                                               },
                                               model: {
                                                 value:

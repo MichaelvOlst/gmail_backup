@@ -28,8 +28,9 @@ func (p *Provider) ListFolder() {
 }
 
 // Put returns google_drive
-func (p *Provider) Put(filename, path string, file *os.File) {
+func (p *Provider) Put(filename, path string, file *os.File) error {
 	fmt.Println("TODO " + filename)
+	return nil
 }
 
 // Mkdir returns google_drive

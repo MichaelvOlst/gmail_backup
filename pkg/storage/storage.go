@@ -37,7 +37,7 @@ func (s *Storage) UseProviders(viders ...Provider) {
 type Provider interface {
 	Name() string
 	ListFolder()
-	Put(filename, path string, file *os.File)
+	Put(filename, path string, file *os.File) error
 	Mkdir(path string) error
 	IsNotExists(err error) bool
 }

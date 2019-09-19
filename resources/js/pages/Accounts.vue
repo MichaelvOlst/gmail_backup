@@ -37,6 +37,11 @@
                     <v-text-field v-model="form.google_token" :error="errors.google_token !== null" :error-messages="errors.google_token" label="Google token" required></v-text-field>
                     <a v-if="getTokenURL" :href="getTokenURL" target="blank">Get token</a>
                   </v-flex>
+
+                  <v-flex xs12 sm12 md12>
+                    <v-text-field v-model="form.upload_path" :error="errors.upload_path !== null" :error-messages="errors.upload_path" label="Upload path" required></v-text-field>
+                  </v-flex>
+
                   <v-flex xs12 sm12 md12>
                     <v-select
                       :items="settings.active_storage_options"
@@ -44,6 +49,8 @@
                       item-value="option"
                       label="Storage option"
                       v-model="form.storage_provider"
+                      :error="errors.upload_path !== null"
+                      :error-messages="errors.upload_path" 
                     ></v-select>
                   </v-flex>                  
                 </v-layout>
@@ -108,7 +115,9 @@
       errors: {
         email: null,
         encryption_key: null,
-        google_token: null
+        google_token: null,
+        upload_path: null,
+        storage_provider: null,
       },
     }),
 

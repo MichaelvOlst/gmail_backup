@@ -3,7 +3,6 @@ package dropbox
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -55,15 +54,14 @@ func (p *Provider) ListFolder() {
 }
 
 // Put stores a file in Dropbox
-func (p *Provider) Put(filename, path string, file *os.File) {
+func (p *Provider) Put(filename, path string, file *os.File) error {
 
 	contentsInfo, err := file.Stat()
 	if err != nil {
-		return
+		return err
 	}
 
-	fmt.Println("filename: " + filename)
-	fmt.Println("path: " + path)
+	fmt.Println(contentsInfo.Size())
 
 	commitInfo := files.NewCommitInfo(path + filename)
 	commitInfo.Mode.Tag = "overwrite"
@@ -75,15 +73,16 @@ func (p *Provider) Put(filename, path string, file *os.File) {
 	if contentsInfo.Size() > chunkSize {
 		err = uploadChunked(dbx, file, commitInfo, contentsInfo.Size())
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
-		return
+		return nil
 	}
 
 	if _, err = dbx.Upload(commitInfo, file); err != nil {
-		log.Fatal(err)
-		return
+		return err
 	}
+
+	return nil
 }
 
 func uploadChunked(dbx files.Client, r io.Reader, commitInfo *files.CommitInfo, sizeTotal int64) (err error) {
@@ -133,11 +132,11 @@ func (p *Provider) IsNotExists(err error) bool {
 		return false
 	}
 
-	fmt.Println(cerr.APIError)
-
 	if strings.Contains(cerr.APIError.Error(), "path/conflict/folder/") {
 		return true
 	}
+
+	fmt.Println(cerr.APIError)
 
 	return false
 }
