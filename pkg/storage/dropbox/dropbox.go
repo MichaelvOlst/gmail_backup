@@ -54,7 +54,7 @@ func (p *Provider) ListFolder() {
 }
 
 // Put stores a file in Dropbox
-func (p *Provider) Put(filename, path string, file *os.File) error {
+func (p *Provider) Put(filename, path string, file *os.File, r io.Reader) error {
 
 	contentsInfo, err := file.Stat()
 	if err != nil {
@@ -72,7 +72,7 @@ func (p *Provider) Put(filename, path string, file *os.File) error {
 
 	dbx := p.client
 	if contentsInfo.Size() > chunkSize {
-		err = uploadChunked(dbx, file, commitInfo, contentsInfo.Size())
+		err = uploadChunked(dbx, r, commitInfo, contentsInfo.Size())
 		if err != nil {
 			return err
 		}

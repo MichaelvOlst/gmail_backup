@@ -79,9 +79,9 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 			nextPageToken := r.NextPageToken
 			for {
 
-				// if counter == 0 {
-				// 	break
-				// }
+				if counter == 0 {
+					break
+				}
 
 				g.db.SaveAccountResult(ac, fmt.Sprintf("Messages: %d", len(lm)))
 				r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
@@ -142,9 +142,9 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 			g.db.SaveAccountResult(ac, fmt.Sprintf("Could not save message with the id %s: %v", m.Id, err))
 		}
 
-		// if counter == 10 {
-		// 	break
-		// }
+		if counter == 100 {
+			break
+		}
 
 		eta := 0.55 * float64((len(lm) - counter))
 		g.db.SaveAccountResult(ac, fmt.Sprintf("%d 	/ %d %s", counter, totalMsg, secondsToHuman(int(eta))))
@@ -152,7 +152,7 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 		counter++
 	}
 
-	lm = make(map[string]*gmail.Message) // making map empty
+	lm = nil
 
 	// Make sure to check the error on Close.
 	err = zipWriter.Close()
@@ -177,15 +177,31 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 
 	zipFile, err := os.Open(zipFileFullPath)
 	if err != nil {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not write to temp zip file: %v", err))
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not open zip file: %v", err))
 		return
 	}
 	defer zipFile.Close()
 
-	storage.Put(zipFileName, userPath, zipFile)
+	zipBuf.Reset()
+
+	zipFileStats, err := zipFile.Stat()
+	if err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not get stat from zip file: %v", err))
+		return
+	}
+
+	r := &progressReader{
+		Reader:    zipFile,
+		TotalSize: zipFileStats.Size(),
+		db:        g.db,
+		account:   ac,
+	}
+
+	storage.Put(zipFileName, userPath, zipFile, r)
 
 	g.db.AccountBackupComplete(ac)
 	g.db.SaveAccountResult(ac, "Done")
+
 }
 
 func (g *Gmail) saveMessage(path string, m *gmail.Message, zipWriter *zip.Writer) error {
@@ -206,10 +222,7 @@ func (g *Gmail) saveMessage(path string, m *gmail.Message, zipWriter *zip.Writer
 	}
 
 	filename := fmt.Sprintf("%s/%s.eml", folder, m.Id)
-	// filename := fmt.Sprintf("%s.eml", m.Id)
-	// fmt.Println(filename)
 
-	// Get the file information
 	info, err := tempFile.Stat()
 	if err != nil {
 		return err
@@ -220,8 +233,6 @@ func (g *Gmail) saveMessage(path string, m *gmail.Message, zipWriter *zip.Writer
 		return err
 	}
 
-	// Using FileInfoHeader() above only uses the basename of the file. If we want
-	// to preserve the folder structure we can overwrite this with the full path.
 	header.Name = filename
 	header.Method = zip.Deflate
 
@@ -232,93 +243,6 @@ func (g *Gmail) saveMessage(path string, m *gmail.Message, zipWriter *zip.Writer
 	writer.Write(b)
 	_, err = io.Copy(writer, tempFile)
 	return err
-
-	// zipFile, err := zipWriter.Create(filename)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// _, err = zipFile.Write(b)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// _, err = io.Copy(writer, fileToZip)
-	// return err
-
-	// f, err := zipWriter.Create(filename)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// _, err = f.Write(b)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// fmt.Println(written)
-
-	// fmt.Println(filename)
-
-	// get file's name for the inside of the archive
-	// internalName, err := archiver.NameInArchive(info, filename, filename)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// // write it to the archive
-	// archiveFile := archiver.File{
-	// 	FileInfo: archiver.FileInfo{
-	// 		FileInfo:   info,
-	// 		CustomName: internalName,
-	// 	},
-	// 	ReadCloser: tempFile,
-	// }
-
-	// fmt.Println(archiveFile.Size())
-
-	// fmt.Printf("%+v\n", archiveFile)
-	// z.Write()
-	// err = z.Write(archiveFile)
-	// err = zipWriter.Write(archiveFile)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if err := storage.Mkdir(path); !storage.IsNotExists(err) {
-	// 	return errors.Errorf("Unable to create folder: %s", path)
-	// }
-
-	// filename := fmt.Sprintf("/%s.eml", m.Id)
-
-	// // fmt.Println(filename)
-
-	// file, err := ioutil.TempFile("", "backup_")
-	// if err != nil {
-	// 	return err
-	// }
-	// defer os.Remove(file.Name() )
-
-	// _, err = file.Write(b)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// fmt.Println(path)
-
-	// storage.Put(filename, path, file)
-	// fmt.Println(filename)
-	// f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
-	// if err != nil {
-	// 	return errors.Errorf("Unable to create raw message file: %v", err)
-	// }
-	// defer f.Close()
-
-	// _, err = f.Write(b)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// return nil
 }
 
 func (g *Gmail) decodeMessage(m *gmail.Message) ([]byte, error) {
