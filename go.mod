@@ -19,7 +19,7 @@ require (
 	github.com/gobuffalo/helpers v0.2.4 // indirect
 	github.com/gobuffalo/logger v1.0.1 // indirect
 	github.com/gobuffalo/packr v1.30.1
-	github.com/gobuffalo/packr/v2 v2.5.3 // indirect
+	github.com/gobuffalo/packr/v2 v2.5.3
 	github.com/gobuffalo/plush v3.8.3+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/golang/snappy v0.0.1 // indirect

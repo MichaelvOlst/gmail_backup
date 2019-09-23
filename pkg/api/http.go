@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"github.com/gobuffalo/packr"
@@ -83,6 +83,8 @@ func (a *API) serveFile(filename string) Handler {
 		w.Header().Set("X-Xss-Protection", "1; mode=block")
 		w.Header().Set("Cache-Control", "max-age=432000") // 5 days
 
+		fmt.Println(d.Name())
+
 		http.ServeContent(w, r, filename, d.ModTime(), f)
 		return nil
 	}
@@ -114,21 +116,13 @@ func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// prepend the path with the path to the static directory
-	path = filepath.Join(h.staticPath, path)
+	// path = filepath.Join(h.staticPath, path)
 
-	// check whether a file exists at the given path
-	_, err = os.Stat(path)
-	if os.IsNotExist(err) {
-		// file does not exist, serve index.html
-		w.Write(h.box.Bytes("index.html"))
-		return
-	} else if err != nil {
-		// if we got an error (that wasn't that the file doesn't exist) stating the
-		// file, return a 500 internal server error and stop
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// check whether a file exists at the given path. File does not exist, serve index.html
+	if h.box.Has(path) {
+		http.FileServer(h.box).ServeHTTP(w, r)
 		return
 	}
 
-	// otherwise, use http.FileServer to serve the static dir
-	http.FileServer(h.box).ServeHTTP(w, r)
+	w.Write(h.box.Bytes("index.html"))
 }
