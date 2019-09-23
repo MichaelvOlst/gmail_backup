@@ -61,9 +61,10 @@ func (p *Provider) Put(filename, path string, file *os.File) error {
 		return err
 	}
 
-	fmt.Println(contentsInfo.Size())
+	path = strings.TrimRight(path, "/")
+	filenameBase := fmt.Sprintf("%s/%s", path, filename)
 
-	commitInfo := files.NewCommitInfo(path + filename)
+	commitInfo := files.NewCommitInfo(filenameBase)
 	commitInfo.Mode.Tag = "overwrite"
 
 	// The Dropbox API only accepts timestamps in UTC with second precision.

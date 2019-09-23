@@ -1,19 +1,21 @@
 package gmail
 
 import (
-	"bufio"
+	"archive/zip"
 	"bytes"
 	"encoding/base64"
 	"fmt"
 	"gmail_backup/pkg/models"
 	"gmail_backup/pkg/storage"
+	"io"
 	"io/ioutil"
+	"log"
 	"math"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/mholt/archiver"
 	"google.golang.org/api/googleapi"
 
 	"google.golang.org/api/gmail/v1"
@@ -38,10 +40,6 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 	if err != nil {
 		g.db.SaveAccountResult(ac, fmt.Sprintf("%v", err))
 		return
-	}
-
-	if ac.UploadPath == "" {
-		ac.UploadPath = "/test/"
 	}
 
 	userPath := fmt.Sprintf("/%s/%s", strings.TrimLeft(ac.UploadPath, "/"), ac.Email)
@@ -75,48 +73,40 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 			}
 		}
 
-		break
+		if r.NextPageToken != "" {
 
-		// if len(lm) > 100 {
-		// 	break
-		// }
+			counter := 0
+			nextPageToken := r.NextPageToken
+			for {
 
-		// lm = append(lm, r.Messages...)
+				// if counter == 0 {
+				// 	break
+				// }
 
-		// if r.NextPageToken != "" {
+				g.db.SaveAccountResult(ac, fmt.Sprintf("Messages: %d", len(lm)))
+				r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
 
-		// 	counter := 0
-		// 	nextPageToken := r.NextPageToken
-		// 	for {
+				if err != nil {
+					g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+					return
+				}
 
-		// 		if counter == 0 {
-		// 			break
-		// 		}
+				if r.NextPageToken == "" || len(r.Messages) == 0 {
+					break
+				}
 
-		// 		g.db.SaveAccountResult(ac, fmt.Sprintf("Messages: %d", len(lm)))
-		// 		r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
+				nextPageToken = r.NextPageToken
 
-		// 		if err != nil {
-		// 			g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
-		// 			return
-		// 		}
+				// lm = append(lm, r.Messages...)
+				for _, m := range r.Messages {
+					if _, ok := lm[m.Id]; !ok {
+						lm[m.Id] = m
+					}
+				}
 
-		// 		if r.NextPageToken == "" || len(r.Messages) == 0 {
-		// 			break
-		// 		}
-
-		// 		nextPageToken = r.NextPageToken
-
-		// 		// lm = append(lm, r.Messages...)
-		// 		for _, m := range r.Messages {
-		// 			if _, ok := lm[m.Id]; !ok {
-		// 				lm[m.Id] = m
-		// 			}
-		// 		}
-
-		// 		counter++
-		// 	}
-		// }
+				counter++
+			}
+		}
 	}
 
 	// // return false, nil
@@ -136,16 +126,9 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 	totalMsg := len(lm)
 	g.db.SaveAccountResult(ac, fmt.Sprintf("Total messages %d", totalMsg))
 
-	buf := new(bytes.Buffer)
-	zipWriter := bufio.NewWriter(buf)
-
-	z := archiver.NewZip()
-	err = z.Create(zipWriter)
-	if err != nil {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not create zip file: %v", err))
-		return
-	}
-	defer z.Close()
+	zipBuf := new(bytes.Buffer)
+	zipWriter := zip.NewWriter(zipBuf)
+	defer zipWriter.Close()
 
 	counter := 0
 	for _, m := range lm {
@@ -154,14 +137,14 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 			g.db.SaveAccountResult(ac, fmt.Sprintf("Could not retrieve message with the id %s: %v", m.Id, err))
 		}
 
-		err = g.saveMessage(userPath, md, z)
+		err = g.saveMessage(userPath, md, zipWriter)
 		if err != nil {
 			g.db.SaveAccountResult(ac, fmt.Sprintf("Could not save message with the id %s: %v", m.Id, err))
 		}
 
-		if counter == 10 {
-			break
-		}
+		// if counter == 10 {
+		// 	break
+		// }
 
 		eta := 0.55 * float64((len(lm) - counter))
 		g.db.SaveAccountResult(ac, fmt.Sprintf("%d 	/ %d %s", counter, totalMsg, secondsToHuman(int(eta))))
@@ -171,72 +154,135 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 
 	lm = make(map[string]*gmail.Message) // making map empty
 
-	// fmt.Printf("%v\n", zipWriter)
-	file, err := ioutil.TempFile("", "zip_")
+	// Make sure to check the error on Close.
+	err = zipWriter.Close()
 	if err != nil {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not create temp zip file: %v", err))
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not close the zip file: %v", err))
 		return
 	}
-	defer file.Close()
 
-	// io.Copy(zipWriter, file)
+	tempDir, err := ioutil.TempDir("", "gmail_backup_dir")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir) // clean up
 
-	b, err := file.Write(buf.Bytes())
+	zipFileName := fmt.Sprintf("%s.zip", time.Now().Format("2006-01-02"))
+
+	zipFileFullPath := filepath.Join(tempDir, zipFileName)
+	if err := ioutil.WriteFile(zipFileFullPath, zipBuf.Bytes(), 0777); err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not write to temp zip file: %v", err))
+		return
+	}
+
+	zipFile, err := os.Open(zipFileFullPath)
 	if err != nil {
 		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not write to temp zip file: %v", err))
 		return
 	}
-	fmt.Println(b)
-	// file.Write(zipWriter)
-	// fmt.Printf("%v\n", byteBuffer.Bytes())
+	defer zipFile.Close()
 
-	storage.Put("/test.zip", ac.UploadPath, file)
+	storage.Put(zipFileName, userPath, zipFile)
 
 	g.db.AccountBackupComplete(ac)
-
 	g.db.SaveAccountResult(ac, "Done")
 }
 
-func (g *Gmail) saveMessage(path string, m *gmail.Message, z *archiver.Zip) error {
+func (g *Gmail) saveMessage(path string, m *gmail.Message, zipWriter *zip.Writer) error {
 
 	b, _ := g.decodeMessage(m)
 	t := time.Unix(m.InternalDate/1000, 0)
-	path = fmt.Sprintf("%s/%s", path, t.Format("2006-01"))
+	folder := fmt.Sprintf("%s", t.Format("2006-01"))
 
-	file, err := ioutil.TempFile("", "backup_")
+	tempFile, err := ioutil.TempFile("", "backup_")
 	if err != nil {
 		return err
 	}
-	defer os.Remove(file.Name())
+	defer os.Remove(tempFile.Name())
 
-	_, err = file.Write(b)
+	_, err = tempFile.Write(b)
 	if err != nil {
 		return err
 	}
 
-	info, err := os.Stat(file.Name())
+	filename := fmt.Sprintf("%s/%s.eml", folder, m.Id)
+	// filename := fmt.Sprintf("%s.eml", m.Id)
+	// fmt.Println(filename)
+
+	// Get the file information
+	info, err := tempFile.Stat()
 	if err != nil {
 		return err
 	}
+
+	header, err := zip.FileInfoHeader(info)
+	if err != nil {
+		return err
+	}
+
+	// Using FileInfoHeader() above only uses the basename of the file. If we want
+	// to preserve the folder structure we can overwrite this with the full path.
+	header.Name = filename
+	header.Method = zip.Deflate
+
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+	writer.Write(b)
+	_, err = io.Copy(writer, tempFile)
+	return err
+
+	// zipFile, err := zipWriter.Create(filename)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// _, err = zipFile.Write(b)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// _, err = io.Copy(writer, fileToZip)
+	// return err
+
+	// f, err := zipWriter.Create(filename)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// _, err = f.Write(b)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// fmt.Println(written)
+
+	// fmt.Println(filename)
 
 	// get file's name for the inside of the archive
-	internalName, err := archiver.NameInArchive(info, m.Id+".eml", path)
-	if err != nil {
-		return err
-	}
+	// internalName, err := archiver.NameInArchive(info, filename, filename)
+	// if err != nil {
+	// 	return err
+	// }
 
-	// write it to the archive
-	err = z.Write(archiver.File{
-		FileInfo: archiver.FileInfo{
-			FileInfo:   info,
-			CustomName: internalName,
-		},
-		ReadCloser: file,
-	})
+	// // write it to the archive
+	// archiveFile := archiver.File{
+	// 	FileInfo: archiver.FileInfo{
+	// 		FileInfo:   info,
+	// 		CustomName: internalName,
+	// 	},
+	// 	ReadCloser: tempFile,
+	// }
 
-	if err != nil {
-		return err
-	}
+	// fmt.Println(archiveFile.Size())
+
+	// fmt.Printf("%+v\n", archiveFile)
+	// z.Write()
+	// err = z.Write(archiveFile)
+	// err = zipWriter.Write(archiveFile)
+	// if err != nil {
+	// 	return err
+	// }
 
 	// if err := storage.Mkdir(path); !storage.IsNotExists(err) {
 	// 	return errors.Errorf("Unable to create folder: %s", path)
@@ -250,7 +296,7 @@ func (g *Gmail) saveMessage(path string, m *gmail.Message, z *archiver.Zip) erro
 	// if err != nil {
 	// 	return err
 	// }
-	// defer os.Remove(file.Name())
+	// defer os.Remove(file.Name() )
 
 	// _, err = file.Write(b)
 	// if err != nil {
@@ -272,7 +318,7 @@ func (g *Gmail) saveMessage(path string, m *gmail.Message, z *archiver.Zip) erro
 	// 	return err
 	// }
 
-	return nil
+	// return nil
 }
 
 func (g *Gmail) decodeMessage(m *gmail.Message) ([]byte, error) {
