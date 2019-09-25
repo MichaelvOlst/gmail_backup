@@ -2,17 +2,14 @@ package gmail
 
 import (
 	"archive/zip"
-	"bytes"
 	"encoding/base64"
 	"fmt"
 	"gmail_backup/pkg/models"
 	"gmail_backup/pkg/storage"
 	"io"
 	"io/ioutil"
-	"log"
 	"math"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -23,6 +20,12 @@ import (
 
 // Backup recieves an account to backup
 func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
+
+	dataFolder := "data"
+
+	if _, err := os.Stat(dataFolder); os.IsNotExist(err) {
+		os.Mkdir(dataFolder, 0777)
+	}
 
 	api, err := g.getClient(ac)
 	if err != nil {
@@ -126,8 +129,14 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 	totalMsg := len(lm)
 	g.db.SaveAccountResult(ac, fmt.Sprintf("Total messages %d", totalMsg))
 
-	zipBuf := new(bytes.Buffer)
-	zipWriter := zip.NewWriter(zipBuf)
+	zipFilename := fmt.Sprintf("%s/%s-%s.zip", dataFolder, ac.Email, time.Now().Format("2006-01-02-15:04"))
+	zipfile, err := os.Create(zipFilename)
+	if err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not create temp %s file: %v", zipFilename, err))
+		return
+	}
+
+	zipWriter := zip.NewWriter(zipfile)
 	defer zipWriter.Close()
 
 	counter := 0
@@ -160,44 +169,37 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not close the zip file: %v", err))
 		return
 	}
+	zipfile.Close()
 
-	tempDir, err := ioutil.TempDir("", "gmail_backup_dir")
+	zipfile, err = os.Open(zipFilename)
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.RemoveAll(tempDir) // clean up
-
-	zipFileName := fmt.Sprintf("%s.zip", time.Now().Format("2006-01-02"))
-
-	zipFileFullPath := filepath.Join(tempDir, zipFileName)
-	if err := ioutil.WriteFile(zipFileFullPath, zipBuf.Bytes(), 0777); err != nil {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not write to temp zip file: %v", err))
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not open temp zip file: %v", err))
 		return
 	}
+	defer zipfile.Close()
 
-	zipFile, err := os.Open(zipFileFullPath)
-	if err != nil {
-		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not open zip file: %v", err))
-		return
-	}
-	defer zipFile.Close()
-
-	zipBuf.Reset()
-
-	zipFileStats, err := zipFile.Stat()
+	zipFileStats, err := zipfile.Stat()
 	if err != nil {
 		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not get stat from zip file: %v", err))
 		return
 	}
 
 	r := &progressReader{
-		Reader:    zipFile,
+		Reader:    zipfile,
 		TotalSize: zipFileStats.Size(),
 		db:        g.db,
 		account:   ac,
 	}
 
-	storage.Put(zipFileName, userPath, zipFile, r)
+	dropboxName := fmt.Sprintf("%s.zip", time.Now().Format("2006-01-02-15:04"))
+
+	storage.Put(dropboxName, userPath, zipfile, r)
+
+	err = os.Remove(zipFilename)
+	if err != nil {
+		g.db.SaveAccountResult(ac, fmt.Sprintf("Could not remove temp zip file %s: %v", zipFilename, err))
+		return
+	}
 
 	g.db.AccountBackupComplete(ac)
 	g.db.SaveAccountResult(ac, "Done")

@@ -10,6 +10,7 @@ const name = "ftp"
 
 // Config holds the config the ftp option
 type Config struct {
+	Host     string `json:"host"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
