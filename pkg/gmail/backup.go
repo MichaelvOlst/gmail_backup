@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asdine/storm"
+
 	"google.golang.org/api/googleapi"
 
 	"google.golang.org/api/gmail/v1"
@@ -45,11 +47,28 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 		return
 	}
 
+	// err = g.db.Drop(&models.Message{})
+	// if err != nil {
+	// 	g.db.SaveAccountResult(ac, fmt.Sprintf("Could not drop table messagess: %v", err))
+	// 	return
+	// }
+	// fmt.Println("done dropping")
+	// return
+
 	userPath := fmt.Sprintf("/%s/%s", strings.TrimLeft(ac.UploadPath, "/"), ac.Email)
 	if err = storage.Mkdir(userPath); err != nil && !storage.IsNotExists(err) {
 		g.db.SaveAccountResult(ac, fmt.Sprintf("Unable to create the folder: %s; error: %v", userPath, err))
 		return
 	}
+
+	// var storedMsg []models.Message
+	// err = g.db.All(&storedMsg)
+	// if err != nil {
+	// 	g.db.SaveAccountResult(ac, fmt.Sprintf("Could not get list of messages; error: %v", err))
+	// 	return
+	// }
+	// fmt.Printf("%+v", storedMsg)
+	// return
 
 	user := "me"
 	lm := make(map[string]*gmail.Message)
@@ -71,9 +90,21 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 		}
 
 		for _, m := range r.Messages {
-			if _, ok := lm[m.Id]; !ok {
-				lm[m.Id] = m
+
+			sm, err := g.db.GetMessageByID(ac.ID, m.Id)
+			if err != nil && err != storm.ErrNotFound {
+				g.db.SaveAccountResult(ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
+				return
 			}
+
+			if sm == nil {
+				if _, ok := lm[m.Id]; !ok {
+					lm[m.Id] = m
+				}
+			} else {
+				fmt.Println("Found message with ID " + m.Id)
+			}
+
 		}
 
 		if r.NextPageToken != "" {
@@ -82,9 +113,9 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 			nextPageToken := r.NextPageToken
 			for {
 
-				if counter == 0 {
-					break
-				}
+				// if counter == 0 {
+				// 	break
+				// }
 
 				g.db.SaveAccountResult(ac, fmt.Sprintf("Messages: %d", len(lm)))
 				r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
@@ -102,8 +133,19 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 
 				// lm = append(lm, r.Messages...)
 				for _, m := range r.Messages {
-					if _, ok := lm[m.Id]; !ok {
-						lm[m.Id] = m
+
+					sm, err := g.db.GetMessageByID(ac.ID, m.Id)
+					if err != nil && err != storm.ErrNotFound {
+						g.db.SaveAccountResult(ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
+						return
+					}
+
+					if sm == nil {
+						if _, ok := lm[m.Id]; !ok {
+							lm[m.Id] = m
+						}
+					} else {
+						fmt.Println("Found message with ID " + m.Id)
 					}
 				}
 
@@ -148,11 +190,16 @@ func (g *Gmail) Backup(ac *models.Account, s *storage.Storage) {
 
 		err = g.saveMessage(userPath, md, zipWriter)
 		if err != nil {
-			g.db.SaveAccountResult(ac, fmt.Sprintf("Could not save message with the id %s: %v", m.Id, err))
+			g.db.SaveAccountResult(ac, fmt.Sprintf("Could not store message with the id %s: %v", m.Id, err))
 		}
 
 		if counter == 100 {
 			break
+		}
+
+		_, err = g.db.SaveMessage(&models.Message{ID: m.Id, AccountID: ac.ID})
+		if err != nil {
+			g.db.SaveAccountResult(ac, fmt.Sprintf("Could not save message with the id %s: %v", m.Id, err))
 		}
 
 		eta := 0.55 * float64((len(lm) - counter))
