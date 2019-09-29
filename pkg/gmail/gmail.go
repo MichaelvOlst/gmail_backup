@@ -51,7 +51,7 @@ func (g *Gmail) GetAuthCodeURL() string {
 }
 
 // getClient gets the client for the given user and saves the token for the given user and saves it if it has been changed
-func (g *Gmail) getClient(ac *models.Account) (*gmail.Service, error) {
+func (g *Gmail) getClient(ac models.Account) (*gmail.Service, error) {
 
 	if ac.OauthToken == nil && ac.GoogleToken != "" {
 		t, err := g.AuthConfig.Exchange(context.TODO(), ac.GoogleToken)
@@ -59,7 +59,7 @@ func (g *Gmail) getClient(ac *models.Account) (*gmail.Service, error) {
 			return nil, err
 		}
 
-		err = g.db.UpdateTokenAccount(ac, t)
+		err = g.db.UpdateTokenAccount(&ac, t)
 		if err != nil {
 			return nil, err
 		}
@@ -72,7 +72,7 @@ func (g *Gmail) getClient(ac *models.Account) (*gmail.Service, error) {
 	}
 
 	if newToken.AccessToken != ac.OauthToken.AccessToken {
-		err = g.db.UpdateTokenAccount(ac, newToken)
+		err = g.db.UpdateTokenAccount(&ac, newToken)
 		if err != nil {
 			return nil, err
 		}

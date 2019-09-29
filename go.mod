@@ -50,6 +50,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4 // indirect
+	github.com/robfig/cron/v3 v3.0.0
 	github.com/rogpeppe/fastuuid v1.2.0 // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/sirupsen/logrus v1.4.2

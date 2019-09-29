@@ -65,5 +65,7 @@ var serveCmd = &cobra.Command{
 		if err := server.Shutdown(ctx); err != nil {
 			fmt.Printf("Could not shutdown the server %s", err)
 		}
+
+		app.cronjob.Stop()
 	},
 }

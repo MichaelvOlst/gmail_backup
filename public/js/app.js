@@ -2136,6 +2136,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
 
 
 
@@ -2167,14 +2171,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         encryption_key: '',
         attachments: true,
         google_token: '',
-        storage_provider: null
+        storage_provider: null,
+        cron_expression: null
       },
       errors: {
         email: null,
         encryption_key: null,
         google_token: null,
         upload_path: null,
-        storage_provider: null
+        storage_provider: null,
+        cron_expression: null
       }
     };
   },
@@ -5884,6 +5890,45 @@ var render = function() {
                                                   )
                                                 },
                                                 expression: "form.upload_path"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "v-flex",
+                                          {
+                                            attrs: {
+                                              xs12: "",
+                                              sm12: "",
+                                              md12: ""
+                                            }
+                                          },
+                                          [
+                                            _c("v-text-field", {
+                                              attrs: {
+                                                error:
+                                                  _vm.errors.cron_expression !==
+                                                  null,
+                                                "error-messages":
+                                                  _vm.errors.cron_expression,
+                                                label: "Cronjob",
+                                                placeholder:
+                                                  "e.g. * * * * *, @daily, @hourly",
+                                                required: ""
+                                              },
+                                              model: {
+                                                value: _vm.form.cron_expression,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.form,
+                                                    "cron_expression",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "form.cron_expression"
                                               }
                                             })
                                           ],

@@ -43,6 +43,10 @@
                   </v-flex>
 
                   <v-flex xs12 sm12 md12>
+                    <v-text-field v-model="form.cron_expression" :error="errors.cron_expression !== null" :error-messages="errors.cron_expression" label="Cronjob" placeholder="e.g. * * * * *, @daily, @hourly" required></v-text-field>
+                  </v-flex>
+
+                  <v-flex xs12 sm12 md12>
                     <v-select
                       :items="settings.active_storage_options"
                       item-text="name"
@@ -111,6 +115,7 @@
         attachments: true,
         google_token: '',
         storage_provider: null,
+        cron_expression: null,
       },
       errors: {
         email: null,
@@ -118,6 +123,8 @@
         google_token: null,
         upload_path: null,
         storage_provider: null,
+        cron_expression: null,
+
       },
     }),
 
@@ -218,7 +225,7 @@
           if(data.backup_progress_message == "done") {
             alert("Done")
             item.backup_progress_message = data.backup_progress_message
-            websocket.close()
+            // websocket.close()
             return
           }
 

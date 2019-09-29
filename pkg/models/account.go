@@ -20,6 +20,7 @@ type Account struct {
 	OauthToken        *oauth2.Token `json:"token"`
 	StorageProvider   string        `json:"storage_provider"`
 	UploadPath        string        `json:"upload_path"`
+	CronExpression    string        `json:"cron_expression"`
 }
 
 // Validate the account model
@@ -49,6 +50,10 @@ func (a *Account) Validate() map[string]string {
 
 	if strings.TrimSpace(a.UploadPath) == "" {
 		v["upload_path"] = "Upload path is required"
+	}
+
+	if strings.TrimSpace(a.CronExpression) == "" {
+		v["cron_expression"] = "Cronjob is required"
 	}
 
 	return v
