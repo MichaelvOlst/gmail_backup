@@ -45,7 +45,7 @@ func (a *API) HandlerBackupAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go a.gmail.Backup(*ac, a.storage)
+	// go a.gmail.Backup(*ac, a.storage)
 
 	go a.writer(ws, ac)
 
@@ -79,7 +79,7 @@ func (a *API) writer(conn *websocket.Conn, ac *models.Account) {
 			// and finally we write this JSON string to our WebSocket
 			// connection and record any errors if there has been any
 			if err := conn.WriteJSON(ab); err != nil {
-				fmt.Println(err)
+				// fmt.Println(err)
 				conn.Close()
 				return
 			}

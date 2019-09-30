@@ -39,7 +39,7 @@ var serveCmd = &cobra.Command{
 			log.Fatalf("Could not init gmail. error %v", err)
 		}
 
-		api := api.New(app.config, app.db, &box, app.storage, g)
+		api := api.New(app.config, app.db, &box, app.storage, g, app.account)
 
 		server := &http.Server{
 			Addr:         addr,
@@ -66,6 +66,6 @@ var serveCmd = &cobra.Command{
 			fmt.Printf("Could not shutdown the server %s", err)
 		}
 
-		app.cronjob.Stop()
+		app.account.Close()
 	},
 }

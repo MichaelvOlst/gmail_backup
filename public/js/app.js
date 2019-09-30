@@ -2213,6 +2213,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     var _created = _asyncToGenerator(
     /*#__PURE__*/
     _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
+      var _this = this;
+
       var response, _response;
 
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
@@ -2232,8 +2234,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
               }
 
               this.getAllAccounts();
+              setTimeout(function () {
+                _this.startWebsockets();
+              }, 1000);
 
-            case 3:
+            case 4:
             case "end":
               return _context.stop();
           }
@@ -2262,8 +2267,50 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       return providerName || "Unknown";
     },
+    startWebsockets: function startWebsockets() {
+      for (var key in this.accounts) {
+        var account = this.accounts[key];
+        this.listenWebsocketFor(account);
+      }
+    },
     generateKey: function generateKey() {
       this.form.encryption_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    },
+    listenWebsocketFor: function listenWebsocketFor(item) {
+      var websocket = new WebSocket("ws:/".concat(window.location.host, "/api/backup/").concat(item.id));
+      console.log("Attempting Connection...");
+
+      websocket.onopen = function (event) {
+        console.log("Successfully connected to websocket server");
+      };
+
+      websocket.onerror = function (error) {
+        console.log("Error connecting to websocket server");
+        console.log(error);
+        websocket.close();
+      };
+
+      websocket.onmessage = function (event) {
+        // parse the event data sent from our websocket server
+        var data = JSON.parse(event.data);
+
+        if (data.error) {
+          alert("Error occured: ".concat(data.error));
+          item.backup_progress_message = data.error;
+          websocket.close();
+          return;
+        }
+
+        if (data.backup_progress_message == "done") {
+          item.backup_progress_message = data.backup_progress_message; // websocket.close()
+
+          return;
+        }
+
+        item.backup_progress_message = data.backup_progress_message; // populate our `sub` element with the total subscriber counter for our
+        // channel
+        // console.log(data)
+      };
     },
     backup: function () {
       var _backup = _asyncToGenerator(
@@ -2308,8 +2355,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
                   if (data.backup_progress_message == "done") {
                     alert("Done");
-                    item.backup_progress_message = data.backup_progress_message;
-                    websocket.close();
+                    item.backup_progress_message = data.backup_progress_message; // websocket.close()
+
                     return;
                   }
 

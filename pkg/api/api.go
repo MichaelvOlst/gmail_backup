@@ -1,6 +1,7 @@
 package api
 
 import (
+	"gmail_backup/pkg/account"
 	"gmail_backup/pkg/config"
 	"gmail_backup/pkg/database"
 	"gmail_backup/pkg/gmail"
@@ -18,10 +19,11 @@ type API struct {
 	sessions sessions.Store
 	storage  *storage.Storage
 	gmail    *gmail.Gmail
+	account  *account.Account
 }
 
 // New returns a new API
-func New(config *config.Config, db *database.Store, box *packr.Box, s *storage.Storage, gmail *gmail.Gmail) *API {
+func New(config *config.Config, db *database.Store, box *packr.Box, s *storage.Storage, gmail *gmail.Gmail, account *account.Account) *API {
 	return &API{
 		config:   config,
 		db:       db,
@@ -29,5 +31,6 @@ func New(config *config.Config, db *database.Store, box *packr.Box, s *storage.S
 		sessions: sessions.NewCookieStore([]byte(config.Server.Secret)),
 		storage:  s,
 		gmail:    gmail,
+		account:  account,
 	}
 }

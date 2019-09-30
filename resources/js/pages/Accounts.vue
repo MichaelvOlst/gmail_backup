@@ -124,7 +124,6 @@
         upload_path: null,
         storage_provider: null,
         cron_expression: null,
-
       },
     }),
 
@@ -172,6 +171,10 @@
       }
 
       this.getAllAccounts()
+
+      setTimeout( () => {
+        this.startWebsockets();
+      }, 1000)
     },
 
     methods: {
@@ -189,11 +192,64 @@
         return providerName || "Unknown"
       },
 
+      startWebsockets() {
+       
+        for (const key in this.accounts) {
+          const account = this.accounts[key]
+          this.listenWebsocketFor(account)
+        }
+      },
+
       generateKey() {
         this.form.encryption_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       },
 
-       async backup (item) {
+
+      listenWebsocketFor(item) {
+        let websocket = new WebSocket(`ws:/${window.location.host}/api/backup/${item.id}`);
+        console.log("Attempting Connection...");
+
+        websocket.onopen = function(event) {
+          console.log("Successfully connected to websocket server");
+        };
+
+        websocket.onerror = function(error) {
+          console.log("Error connecting to websocket server");
+          console.log(error);
+          websocket.close();
+        };
+
+        websocket.onmessage = function(event) {
+          // parse the event data sent from our websocket server
+          let data = JSON.parse(event.data);
+
+          if (data.error) {
+            alert(`Error occured: ${data.error}`)
+            item.backup_progress_message = data.error
+            websocket.close()
+            return
+          }
+
+          if(data.backup_progress_message == "done") {
+            item.backup_progress_message = data.backup_progress_message
+            // websocket.close()
+            return
+          }
+
+          item.backup_progress_message = data.backup_progress_message
+
+          // populate our `sub` element with the total subscriber counter for our
+          // channel
+          // console.log(data)
+        };
+
+
+
+      },
+
+
+      async backup (item) {
+      
         if(!confirm("Are you sure?")) {
           return
         }

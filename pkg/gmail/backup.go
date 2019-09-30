@@ -49,7 +49,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
 	// err = g.db.Drop(&models.Message{})
 	// if err != nil {
-	// 	g.db.SaveAccountResult(ac, fmt.Sprintf("Could not drop table messagess: %v", err))
+	// 	g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not drop table messagess: %v", err))
 	// 	return
 	// }
 	// fmt.Println("done dropping")
@@ -113,9 +113,9 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 			nextPageToken := r.NextPageToken
 			for {
 
-				if counter == 0 {
-					break
-				}
+				// if counter == 0 {
+				// 	break
+				// }
 
 				g.db.SaveAccountResult(&ac, fmt.Sprintf("Messages: %d", len(lm)))
 				r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
@@ -193,7 +193,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 			g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not store message with the id %s: %v", m.Id, err))
 		}
 
-		if counter == 50 {
+		if counter == 100 {
 			break
 		}
 
