@@ -23,6 +23,19 @@ import (
 // Backup recieves an account to backup
 func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
+	if ac.BackupStarted != "done" || ac.BackupStarted == "" {
+		return
+	}
+
+	ac.BackupStarted = "processing"
+	err := g.db.Update(&ac)
+	if err != nil {
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not init backup process %v", err))
+		return
+	}
+
+	// fmt.Printf("%+v\n", ac)
+
 	dataFolder := "data"
 
 	if _, err := os.Stat(dataFolder); os.IsNotExist(err) {
@@ -31,19 +44,19 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
 	api, err := g.getClient(ac)
 	if err != nil {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not connect to gmail: %v", err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not connect to gmail: %v", err))
 		return
 	}
 
 	labels, err := g.getUserLabels(api)
 	if err != nil {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not get user labels: %v", err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get user labels: %v", err))
 		return
 	}
 
 	storage, err := s.GetProvider(ac.StorageProvider)
 	if err != nil {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("%v", err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("%v", err))
 		return
 	}
 
@@ -57,7 +70,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
 	userPath := fmt.Sprintf("/%s/%s", strings.TrimLeft(ac.UploadPath, "/"), ac.Email)
 	if err = storage.Mkdir(userPath); err != nil && !storage.IsNotExists(err) {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Unable to create the folder: %s; error: %v", userPath, err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Unable to create the folder: %s; error: %v", userPath, err))
 		return
 	}
 
@@ -80,7 +93,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
 		r, err := api.Users.Messages.List(user).IncludeSpamTrash(false).LabelIds(label).Do()
 		if err != nil {
-			g.db.SaveAccountResult(&ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+			g.db.SaveAccountError(&ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
 			return
 		}
 
@@ -93,7 +106,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
 			sm, err := g.db.GetMessageByID(ac.ID, m.Id)
 			if err != nil && err != storm.ErrNotFound {
-				g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
+				g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
 				return
 			}
 
@@ -113,15 +126,15 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 			nextPageToken := r.NextPageToken
 			for {
 
-				// if counter == 0 {
-				// 	break
-				// }
+				if counter == 0 {
+					break
+				}
 
 				g.db.SaveAccountResult(&ac, fmt.Sprintf("Messages: %d", len(lm)))
 				r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
 
 				if err != nil {
-					g.db.SaveAccountResult(&ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+					g.db.SaveAccountError(&ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
 					return
 				}
 
@@ -136,7 +149,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
 					sm, err := g.db.GetMessageByID(ac.ID, m.Id)
 					if err != nil && err != storm.ErrNotFound {
-						g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
+						g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
 						return
 					}
 
@@ -164,7 +177,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 	// return
 
 	if len(lm) == 0 {
-		g.db.SaveAccountResult(&ac, "No messages found")
+		g.db.SaveAccountError(&ac, "No messages found")
 		return
 	}
 
@@ -174,7 +187,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 	zipFilename := fmt.Sprintf("%s/%s-%s.zip", dataFolder, ac.Email, time.Now().Format("2006-01-02-15:04"))
 	zipfile, err := os.Create(zipFilename)
 	if err != nil {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not create temp %s file: %v", zipFilename, err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not create temp %s file: %v", zipFilename, err))
 		return
 	}
 
@@ -193,7 +206,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 			g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not store message with the id %s: %v", m.Id, err))
 		}
 
-		if counter == 100 {
+		if counter == 10 {
 			break
 		}
 
@@ -213,21 +226,21 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 	// Make sure to check the error on Close.
 	err = zipWriter.Close()
 	if err != nil {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not close the zip file: %v", err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not close the zip file: %v", err))
 		return
 	}
 	zipfile.Close()
 
 	zipfile, err = os.Open(zipFilename)
 	if err != nil {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not open temp zip file: %v", err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not open temp zip file: %v", err))
 		return
 	}
 	defer zipfile.Close()
 
 	zipFileStats, err := zipfile.Stat()
 	if err != nil {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not get stat from zip file: %v", err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get stat from zip file: %v", err))
 		return
 	}
 
@@ -244,12 +257,20 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
 	err = os.Remove(zipFilename)
 	if err != nil {
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not remove temp zip file %s: %v", zipFilename, err))
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not remove temp zip file %s: %v", zipFilename, err))
 		return
 	}
 
-	g.db.AccountBackupComplete(&ac)
 	g.db.SaveAccountResult(&ac, "Done")
+	g.db.AccountBackupComplete(&ac)
+
+	// ac.BackupStarted = 0
+	// err = g.db.Update(&ac)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	// g.db.SaveAccountError(&ac, fmt.Sprintf("Could not init backup process %v", err))
+	// 	// return
+	// }
 
 }
 

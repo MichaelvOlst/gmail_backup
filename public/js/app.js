@@ -2277,7 +2277,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.form.encryption_key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     },
     listenWebsocketFor: function listenWebsocketFor(item) {
-      var websocket = new WebSocket("ws:/".concat(window.location.host, "/api/backup/").concat(item.id));
+      var websocket = new WebSocket("ws:/".concat(window.location.host, "/api/ws/backup/").concat(item.id));
       console.log("Attempting Connection...");
 
       websocket.onopen = function (event) {
@@ -2296,27 +2296,23 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         if (data.error) {
           alert("Error occured: ".concat(data.error));
-          item.backup_progress_message = data.error;
-          websocket.close();
-          return;
+          item.backup_progress_message = data.error; // websocket.close()
+          // return
         }
 
         if (data.backup_progress_message == "done") {
           item.backup_progress_message = data.backup_progress_message; // websocket.close()
-
-          return;
+          // return
         }
 
-        item.backup_progress_message = data.backup_progress_message; // populate our `sub` element with the total subscriber counter for our
-        // channel
-        // console.log(data)
+        item.backup_progress_message = data.backup_progress_message;
       };
     },
     backup: function () {
       var _backup = _asyncToGenerator(
       /*#__PURE__*/
       _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(item) {
-        var websocket;
+        var response;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -2329,54 +2325,27 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 return _context2.abrupt("return");
 
               case 2:
-                websocket = new WebSocket("ws:/".concat(window.location.host, "/api/backup/").concat(item.id));
-                console.log("Attempting Connection...");
+                _context2.prev = 2;
+                _context2.next = 5;
+                return this.$store.dispatch(_store_modules_types__WEBPACK_IMPORTED_MODULE_2__["BACKUP_ACCOUNT"], item.id);
 
-                websocket.onopen = function (event) {
-                  console.log("Successfully connected to websocket server");
-                };
+              case 5:
+                response = _context2.sent;
+                console.log(response);
+                _context2.next = 12;
+                break;
 
-                websocket.onerror = function (error) {
-                  console.log("Error connecting to websocket server");
-                  console.log(error);
-                  websocket.close();
-                };
+              case 9:
+                _context2.prev = 9;
+                _context2.t0 = _context2["catch"](2);
+                console.log(_context2.t0);
 
-                websocket.onmessage = function (event) {
-                  // parse the event data sent from our websocket server
-                  var data = JSON.parse(event.data);
-
-                  if (data.error) {
-                    alert("Error occured: ".concat(data.error));
-                    item.backup_progress_message = data.error;
-                    websocket.close();
-                    return;
-                  }
-
-                  if (data.backup_progress_message == "done") {
-                    alert("Done");
-                    item.backup_progress_message = data.backup_progress_message; // websocket.close()
-
-                    return;
-                  }
-
-                  item.backup_progress_message = data.backup_progress_message; // populate our `sub` element with the total subscriber counter for our
-                  // channel
-                  // console.log(data)
-                }; // try {
-                //   let response = await this.$store.dispatch(BACKUP_ACCOUNT, item.id)
-                //   console.log(response)
-                // } catch (e) {
-                //   console.log(e)
-                // }
-
-
-              case 7:
+              case 12:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2);
+        }, _callee2, this, [[2, 9]]);
       }));
 
       function backup(_x) {

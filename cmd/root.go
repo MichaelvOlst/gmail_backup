@@ -102,8 +102,9 @@ func initApp() {
 
 	err = app.db.Drop(&models.Message{})
 	if err != nil {
-		log.Fatal(err)
-		return
+		fmt.Println(err)
+		// log.Fatal(err)
+		// return
 	}
 	fmt.Println("done dropping")
 

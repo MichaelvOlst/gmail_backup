@@ -32,12 +32,10 @@ func (a *API) HandlerSaveSettings(w http.ResponseWriter, r *http.Request) error 
 		return respond(w, http.StatusInternalServerError, envelope{Error: err})
 	}
 
-	// a.storage.ClearProviders()
-	// for _, val := range s.StorageOptions {
-	// 	if val.Active {
-	// 		a.storage.Register(val.Option, val.Config)
-	// 	}
-	// }
+	err = a.storage.Reset(&s)
+	if err != nil {
+		return respond(w, http.StatusInternalServerError, envelope{Error: err})
+	}
 
 	return respond(w, http.StatusOK, envelope{Result: s})
 }

@@ -75,6 +75,13 @@ func (s *Storage) GetProviders() map[string]Provider {
 	return s.Providers
 }
 
+// Reset resets the storage with the new settings
+func (s *Storage) Reset(settings *models.Settings) error {
+	s.ClearProviders()
+	s.RegisterAll(settings)
+	return nil
+}
+
 // GetProvider returns the registered providers
 func (s *Storage) GetProvider(p string) (Provider, error) {
 	provider, ok := s.Providers[p]

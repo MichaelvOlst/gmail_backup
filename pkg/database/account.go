@@ -64,9 +64,21 @@ func (s *Store) SaveAccountResult(ac *models.Account, r string) error {
 	return nil
 }
 
+// SaveAccountError saves the error message for the given account
+func (s *Store) SaveAccountError(ac *models.Account, r string) error {
+	ac.BackupProgressMsg = r
+	ac.BackupStarted = "done"
+	err := s.Update(ac)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // AccountBackupComplete marks this account completed for backup
 func (s *Store) AccountBackupComplete(ac *models.Account) error {
 	ac.BackupComplete = true
+	ac.BackupStarted = "done"
 	ac.BackupDate = time.Now()
 	err := s.Update(ac)
 	if err != nil {

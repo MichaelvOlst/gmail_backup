@@ -37,6 +37,7 @@ const actions = {
     },
 
     async [BACKUP_ACCOUNT]({commit}, id) {
+
         try {
             const response = await axios.post(`/api/backup/${id}`)
             // commit('account_saved', response.result)

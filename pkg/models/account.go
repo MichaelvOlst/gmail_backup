@@ -14,6 +14,7 @@ type Account struct {
 	Email             string        `json:"email" storm:"unique"`
 	EncryptionKey     string        `json:"encryption_key"`
 	BackupComplete    bool          `json:"backup_complete"`
+	BackupStarted     string        `json:"backup_started"`
 	BackupDate        time.Time     `json:"backup_date"`
 	BackupProgressMsg string        `json:"backup_progress_message"`
 	GoogleToken       string        `json:"google_token"`

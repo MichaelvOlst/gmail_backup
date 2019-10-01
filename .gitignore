@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-credentials.json
+# credentials.json
 gmail_backup
 /.vscode
 gmail_backup.db

@@ -206,7 +206,7 @@
 
 
       listenWebsocketFor(item) {
-        let websocket = new WebSocket(`ws:/${window.location.host}/api/backup/${item.id}`);
+        let websocket = new WebSocket(`ws:/${window.location.host}/api/ws/backup/${item.id}`);
         console.log("Attempting Connection...");
 
         websocket.onopen = function(event) {
@@ -226,25 +226,18 @@
           if (data.error) {
             alert(`Error occured: ${data.error}`)
             item.backup_progress_message = data.error
-            websocket.close()
-            return
+            // websocket.close()
+            // return
           }
 
           if(data.backup_progress_message == "done") {
             item.backup_progress_message = data.backup_progress_message
             // websocket.close()
-            return
+            // return
           }
 
           item.backup_progress_message = data.backup_progress_message
-
-          // populate our `sub` element with the total subscriber counter for our
-          // channel
-          // console.log(data)
         };
-
-
-
       },
 
 
@@ -254,50 +247,12 @@
           return
         }
 
-        let websocket = new WebSocket(`ws:/${window.location.host}/api/backup/${item.id}`);
-        console.log("Attempting Connection...");
-
-        websocket.onopen = function(event) {
-          console.log("Successfully connected to websocket server");
-        };
-
-        websocket.onerror = function(error) {
-          console.log("Error connecting to websocket server");
-          console.log(error);
-          websocket.close();
-        };
-
-        websocket.onmessage = function(event) {
-          // parse the event data sent from our websocket server
-          let data = JSON.parse(event.data);
-
-          if (data.error) {
-            alert(`Error occured: ${data.error}`)
-            item.backup_progress_message = data.error
-            websocket.close()
-            return
-          }
-
-          if(data.backup_progress_message == "done") {
-            alert("Done")
-            item.backup_progress_message = data.backup_progress_message
-            // websocket.close()
-            return
-          }
-
-          item.backup_progress_message = data.backup_progress_message
-
-          // populate our `sub` element with the total subscriber counter for our
-          // channel
-          // console.log(data)
-        };
-
-        // try {
-        //   let response = await this.$store.dispatch(BACKUP_ACCOUNT, item.id)
-        //   console.log(response)
-        // } catch (e) {
-        //   console.log(e)
-        // }
+        try {
+          let response = await this.$store.dispatch(BACKUP_ACCOUNT, item.id)
+          console.log(response)
+        } catch (e) {
+          console.log(e)
+        }
       },
 
       async getAllAccounts() {

@@ -17,8 +17,8 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// HandlerBackupAccount backups an account and returns a websocket connection
-func (a *API) HandlerBackupAccount(w http.ResponseWriter, r *http.Request) {
+// HandlerWSBackupListener backups an account and returns a websocket connection
+func (a *API) HandlerWSBackupListener(w http.ResponseWriter, r *http.Request) {
 
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
@@ -85,4 +85,32 @@ func (a *API) writer(conn *websocket.Conn, ac *models.Account) {
 			}
 		}
 	}
+}
+
+// HandlerBackupAccount backups an account
+func (a *API) HandlerBackupAccount(w http.ResponseWriter, r *http.Request) error {
+
+	vars := mux.Vars(r)
+	aid, ok := vars["id"]
+	if !ok {
+		return respond(w, http.StatusUnauthorized, envelope{Error: "Could not parse Id"})
+	}
+	id, _ := strconv.Atoi(aid)
+
+	ac, err := a.db.GetAccountByID(id)
+	if err != nil {
+		return respond(w, http.StatusUnauthorized, envelope{Error: "Could not find an account with this Id"})
+	}
+
+	fmt.Printf("%+v\n", ac)
+
+	// fmt.Println(ac.BackupStarted)
+	// ac.BackupStarted = "done"
+	if ac.BackupStarted != "done" && ac.BackupStarted != "" {
+		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Backup process already started"})
+	}
+
+	go a.gmail.Backup(*ac, a.storage)
+
+	return respond(w, http.StatusOK, envelope{Result: "Ok"})
 }
