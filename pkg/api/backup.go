@@ -102,11 +102,11 @@ func (a *API) HandlerBackupAccount(w http.ResponseWriter, r *http.Request) error
 		return respond(w, http.StatusUnauthorized, envelope{Error: "Could not find an account with this Id"})
 	}
 
-	fmt.Printf("%+v\n", ac)
+	// fmt.Printf("%+v\n", ac)
 
 	// fmt.Println(ac.BackupStarted)
-	// ac.BackupStarted = "done"
-	if ac.BackupStarted != "done" && ac.BackupStarted != "" {
+	ac.BackupStarted = "false"
+	if ac.BackupStarted == "true" {
 		return respond(w, http.StatusUnprocessableEntity, envelope{Error: "Backup process already started"})
 	}
 

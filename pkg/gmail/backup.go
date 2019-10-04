@@ -13,8 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asdine/storm"
-
 	"google.golang.org/api/googleapi"
 
 	"google.golang.org/api/gmail/v1"
@@ -23,11 +21,11 @@ import (
 // Backup recieves an account to backup
 func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
-	if ac.BackupStarted != "done" || ac.BackupStarted == "" {
+	if ac.BackupStarted == "true" {
 		return
 	}
 
-	ac.BackupStarted = "processing"
+	ac.BackupStarted = "true"
 	err := g.db.Update(&ac)
 	if err != nil {
 		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not init backup process %v", err))
@@ -48,11 +46,11 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 		return
 	}
 
-	labels, err := g.getUserLabels(api)
-	if err != nil {
-		g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get user labels: %v", err))
-		return
-	}
+	// labels, err := g.getUserLabels(api)
+	// if err != nil {
+	// 	g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get user labels: %v", err))
+	// 	return
+	// }
 
 	storage, err := s.GetProvider(ac.StorageProvider)
 	if err != nil {
@@ -84,88 +82,97 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 	// return
 
 	user := "me"
-	lm := make(map[string]*gmail.Message)
-	g.db.SaveAccountResult(&ac, "Collecting messages")
-
-	for _, label := range labels {
-
-		g.db.SaveAccountResult(&ac, fmt.Sprintf("Getting messages for label: %s", label))
-
-		r, err := api.Users.Messages.List(user).IncludeSpamTrash(false).LabelIds(label).Do()
-		if err != nil {
-			g.db.SaveAccountError(&ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
-			return
-		}
-
-		if len(r.Messages) == 0 {
-			g.db.SaveAccountResult(&ac, fmt.Sprintf("No messages found with the label: %s", label))
-			continue
-		}
-
-		for _, m := range r.Messages {
-
-			sm, err := g.db.GetMessageByID(ac.ID, m.Id)
-			if err != nil && err != storm.ErrNotFound {
-				g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
-				return
-			}
-
-			if sm == nil {
-				if _, ok := lm[m.Id]; !ok {
-					lm[m.Id] = m
-				}
-			} else {
-				fmt.Println("Found message with ID " + m.Id)
-			}
-
-		}
-
-		if r.NextPageToken != "" {
-
-			counter := 0
-			nextPageToken := r.NextPageToken
-			for {
-
-				if counter == 0 {
-					break
-				}
-
-				g.db.SaveAccountResult(&ac, fmt.Sprintf("Messages: %d", len(lm)))
-				r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
-
-				if err != nil {
-					g.db.SaveAccountError(&ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
-					return
-				}
-
-				if r.NextPageToken == "" || len(r.Messages) == 0 {
-					break
-				}
-
-				nextPageToken = r.NextPageToken
-
-				// lm = append(lm, r.Messages...)
-				for _, m := range r.Messages {
-
-					sm, err := g.db.GetMessageByID(ac.ID, m.Id)
-					if err != nil && err != storm.ErrNotFound {
-						g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
-						return
-					}
-
-					if sm == nil {
-						if _, ok := lm[m.Id]; !ok {
-							lm[m.Id] = m
-						}
-					} else {
-						fmt.Println("Found message with ID " + m.Id)
-					}
-				}
-
-				counter++
-			}
-		}
+	lm, err := g.collectMessages(user, api, &ac)
+	if err != nil {
+		g.db.SaveAccountError(&ac, fmt.Sprintf("Unable to collect messages: %v", err))
+		return
 	}
+
+	// lm := make(map[string]*gmail.Message)
+	// g.db.SaveAccountResult(&ac, "Collecting messages...")
+
+	// for _, label := range labels {
+
+	// 	// g.db.SaveAccountResult(&ac, fmt.Sprintf("Getting messages for label: %s", label))
+
+	// 	r, err := api.Users.Messages.List(user).IncludeSpamTrash(false).LabelIds(label).Do()
+	// 	if err != nil {
+	// 		g.db.SaveAccountError(&ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+	// 		return
+	// 	}
+
+	// 	if len(r.Messages) == 0 {
+	// 		// g.db.SaveAccountResult(&ac, fmt.Sprintf("No messages found with the label: %s", label))
+	// 		continue
+	// 	}
+
+	// 	for _, m := range r.Messages {
+
+	// 		sm, err := g.db.GetMessageByID(ac.ID, m.Id)
+	// 		if err != nil && err != storm.ErrNotFound {
+	// 			g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
+	// 			return
+	// 		}
+
+	// 		if sm == nil {
+	// 			if _, ok := lm[m.Id]; !ok {
+	// 				lm[m.Id] = m
+	// 			}
+	// 		}
+	// 		//  else {
+	// 		// 	fmt.Println("Found message with ID " + m.Id)
+	// 		// }
+
+	// 	}
+
+	// 	if r.NextPageToken != "" {
+
+	// 		counter := 0
+	// 		nextPageToken := r.NextPageToken
+	// 		for {
+
+	// 			// if counter == 0 {
+	// 			// 	break
+	// 			// }
+
+	// 			g.db.SaveAccountResult(&ac, fmt.Sprintf("Messages: %d", len(lm)))
+	// 			r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
+
+	// 			if err != nil {
+	// 				g.db.SaveAccountError(&ac, fmt.Sprintf("Unable to retrieve messages: %v", err))
+	// 				return
+	// 			}
+
+	// 			if r.NextPageToken == "" || len(r.Messages) == 0 {
+	// 				break
+	// 			}
+
+	// 			nextPageToken = r.NextPageToken
+
+	// 			// lm = append(lm, r.Messages...)
+	// 			for _, m := range r.Messages {
+
+	// 				sm, err := g.db.GetMessageByID(ac.ID, m.Id)
+	// 				if err != nil && err != storm.ErrNotFound {
+	// 					g.db.SaveAccountError(&ac, fmt.Sprintf("Could not get message with ID %s. %v", m.Id, err))
+	// 					return
+	// 				}
+
+	// 				if sm == nil {
+	// 					if _, ok := lm[m.Id]; !ok {
+	// 						lm[m.Id] = m
+	// 					}
+	// 				}
+
+	// 				// else {
+	// 				// 	fmt.Println("Found message with ID " + m.Id)
+	// 				// }
+	// 			}
+
+	// 			counter++
+	// 		}
+	// 	}
+	// }
 
 	// // return false, nil
 	// fmt.Println(len(lm))
@@ -206,7 +213,7 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 			g.db.SaveAccountResult(&ac, fmt.Sprintf("Could not store message with the id %s: %v", m.Id, err))
 		}
 
-		if counter == 10 {
+		if counter == 100 {
 			break
 		}
 
@@ -263,14 +270,6 @@ func (g *Gmail) Backup(ac models.Account, s *storage.Storage) {
 
 	g.db.SaveAccountResult(&ac, "Done")
 	g.db.AccountBackupComplete(&ac)
-
-	// ac.BackupStarted = 0
-	// err = g.db.Update(&ac)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	// g.db.SaveAccountError(&ac, fmt.Sprintf("Could not init backup process %v", err))
-	// 	// return
-	// }
 
 }
 

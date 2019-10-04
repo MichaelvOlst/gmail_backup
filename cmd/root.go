@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"gmail_backup/pkg/account"
 	"gmail_backup/pkg/config"
 	"gmail_backup/pkg/database"
@@ -100,13 +99,13 @@ func initApp() {
 	app.account = acc
 	acc.Start()
 
-	err = app.db.Drop(&models.Message{})
-	if err != nil {
-		fmt.Println(err)
-		// log.Fatal(err)
-		// return
-	}
-	fmt.Println("done dropping")
+	// err = app.db.Drop(&models.Message{})
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	// log.Fatal(err)
+	// 	// return
+	// }
+	// fmt.Println("done dropping")
 
 }
 
