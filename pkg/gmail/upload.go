@@ -4,10 +4,44 @@ import (
 	"fmt"
 	"gmail_backup/pkg/database"
 	"gmail_backup/pkg/models"
+	"gmail_backup/pkg/storage"
 	"io"
+	"os"
+	"time"
 
 	"github.com/dustin/go-humanize"
 )
+
+func (g *Gmail) upload(file, userPath string, ac *models.Account, storage storage.Provider) error {
+	zipfile, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer zipfile.Close()
+
+	zipFileStats, err := zipfile.Stat()
+	if err != nil {
+		return err
+	}
+
+	r := &progressReader{
+		Reader:    zipfile,
+		TotalSize: zipFileStats.Size(),
+		db:        g.db,
+		account:   ac,
+	}
+
+	dropboxName := fmt.Sprintf("%s.zip", time.Now().Format("2006-01-02-15:04"))
+
+	storage.Put(dropboxName, userPath, zipfile, r)
+
+	err = os.Remove(file)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 type progressReader struct {
 	io.Reader

@@ -2,10 +2,12 @@ package gmail
 
 import (
 	"context"
+	"fmt"
 	"gmail_backup/pkg/config"
 	"gmail_backup/pkg/database"
 	"gmail_backup/pkg/models"
 	"io/ioutil"
+	"math"
 
 	"github.com/mholt/archiver"
 
@@ -86,4 +88,42 @@ func (g *Gmail) getClient(ac models.Account) (*gmail.Service, error) {
 	}
 
 	return api, nil
+}
+
+func secondsToHuman(input int) string {
+	years := math.Floor(float64(input) / 60 / 60 / 24 / 7 / 30 / 12)
+	seconds := input % (60 * 60 * 24 * 7 * 30 * 12)
+	months := math.Floor(float64(seconds) / 60 / 60 / 24 / 7 / 30)
+	seconds = input % (60 * 60 * 24 * 7 * 30)
+	weeks := math.Floor(float64(seconds) / 60 / 60 / 24 / 7)
+	seconds = input % (60 * 60 * 24 * 7)
+	days := math.Floor(float64(seconds) / 60 / 60 / 24)
+	seconds = input % (60 * 60 * 24)
+	hours := math.Floor(float64(seconds) / 60 / 60)
+	seconds = input % (60 * 60)
+	minutes := math.Floor(float64(seconds) / 60)
+	seconds = input % 60
+
+	var result string
+	if years > 0 {
+		result = formatTime(int(years), "y") + formatTime(int(months), "m") + formatTime(int(weeks), "w") + formatTime(int(days), "d") + formatTime(int(hours), "h") + formatTime(int(minutes), "m") + formatTime(int(seconds), "s")
+	} else if months > 0 {
+		result = formatTime(int(months), "m") + formatTime(int(weeks), "w") + formatTime(int(days), "d") + formatTime(int(hours), "h") + formatTime(int(minutes), "m") + formatTime(int(seconds), "s")
+	} else if weeks > 0 {
+		result = formatTime(int(weeks), "w") + formatTime(int(days), "d") + formatTime(int(hours), "h") + formatTime(int(minutes), "m") + formatTime(int(seconds), "s")
+	} else if days > 0 {
+		result = formatTime(int(days), "d") + formatTime(int(hours), "h") + formatTime(int(minutes), "m") + formatTime(int(seconds), "s")
+	} else if hours > 0 {
+		result = formatTime(int(hours), "h") + formatTime(int(minutes), "m") + formatTime(int(seconds), "s")
+	} else if minutes > 0 {
+		result = formatTime(int(minutes), "m") + formatTime(int(seconds), "s")
+	} else {
+		result = formatTime(int(seconds), "s")
+	}
+
+	return result
+}
+
+func formatTime(count int, format string) string {
+	return fmt.Sprintf("%d%s", count, format)
 }
