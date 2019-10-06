@@ -1,6 +1,7 @@
 package ftp
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -38,6 +39,37 @@ func New(cfg Config) *Provider {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// fmt.Printf("%+v\n", c)
+
+	// err = c.ChangeDir("/Public")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// err = c.MakeDir("/ftp")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// c.ChangeDirToParent()
+	// err = c.ChangeDir("/Public")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// err = c.MakeDir("/Public/bla")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	entries, err := c.List("/Public/")
+	if err != nil {
+		fmt.Println(err)
+	}
+	// entries, _ := c.List("/Public")
+	fmt.Printf("%+v\n", entries)
+	// pwd, _ := c.CurrentDir()
+	// fmt.Println(pwd)
 
 	return &Provider{}
 }

@@ -45,7 +45,7 @@ func (a *Account) createCronjobs() error {
 		expression := ac.CronExpression
 		account := ac
 
-		fmt.Printf("%s  ---   %s\n", account.CronExpression, account.Email)
+		// fmt.Printf("%s  ---   %s\n", account.CronExpression, account.Email)
 
 		job := func() {
 			g, err := gmail.New(a.config, a.db)
@@ -65,7 +65,7 @@ func (a *Account) createCronjobs() error {
 		}
 	}
 
-	fmt.Printf("%+v\n", a.cronjob.Entries())
+	// fmt.Printf("%+v\n", a.cronjob.Entries())
 
 	return nil
 }
