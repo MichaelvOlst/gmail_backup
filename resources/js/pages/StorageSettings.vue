@@ -24,12 +24,6 @@
               color="primary"
             ></v-switch>   
 
-            <v-text-field
-              v-model="settings.storage_options[provider].StorageOption.path"
-              label="Path"
-              required
-            ></v-text-field>
-
             <v-text-field v-for="(value, key) in Object.keys(settings.storage_options[provider].Config)" :key="key"
               v-model="settings.storage_options[provider].Config[value]"
               :label="value"

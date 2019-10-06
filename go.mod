@@ -30,6 +30,7 @@ require (
 	github.com/gorilla/websocket v1.4.0
 	github.com/grpc-ecosystem/grpc-gateway v1.9.6 // indirect
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
+	github.com/jlaffaye/ftp v0.0.0-20190828173736-6aaa91c7796e
 	github.com/joho/godotenv v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kisielk/errcheck v1.2.0 // indirect

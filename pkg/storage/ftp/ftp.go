@@ -1,9 +1,10 @@
 package ftp
 
 import (
-	"fmt"
-	"io"
-	"os"
+	"log"
+	"time"
+
+	"github.com/jlaffaye/ftp"
 )
 
 const name = "ftp"
@@ -17,6 +18,7 @@ type Config struct {
 
 // Provider implements storage.Provider for the ftp file storage.
 type Provider struct {
+	client *ftp.ServerConn
 }
 
 // Name returns ftp
@@ -24,37 +26,18 @@ func (p *Provider) Name() string {
 	return name
 }
 
-// ListFolder returns google_drive
-func (p *Provider) ListFolder() {
-	fmt.Println("TODO")
-}
-
-// Put returns google_drive
-func (p *Provider) Put(filename, path string, file *os.File, r io.Reader) error {
-	fmt.Println("TODO " + filename)
-	return nil
-}
-
-// Mkdir returns google_drive
-func (p *Provider) Mkdir(path string) error {
-	fmt.Println("TODO " + path)
-	return nil
-}
-
-// IsNotExists check if a folder already exists
-func (p *Provider) IsNotExists(err error) bool {
-	return false
-	// cerr, ok := err.(files.CreateFolderAPIError)
-	// if !ok {
-	// 	return false
-	// }
-
-	// if cerr.APIError.Error() == "path/conflict/folder/" {
-	// 	return true
-	// }
-}
-
 // New initializer for Provider struct ftp
 func New(cfg Config) *Provider {
+
+	c, err := ftp.Dial(cfg.Host, ftp.DialWithTimeout(5*time.Second))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = c.Login(cfg.Username, cfg.Password)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &Provider{}
 }

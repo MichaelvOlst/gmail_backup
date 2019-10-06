@@ -23,7 +23,6 @@ type StorageOption struct {
 	Option string `json:"option"`
 	Name   string `json:"name"`
 	Active bool   `json:"active"`
-	Path   string `json:"path"`
 }
 
 // Dropbox config for the dropbox storage option

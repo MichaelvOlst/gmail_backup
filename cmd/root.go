@@ -93,11 +93,19 @@ func initApp() {
 		}
 
 	}
+
 	app.storage.RegisterAll(&s)
 
 	acc := account.New(app.db, app.storage, app.config)
 	app.account = acc
 	acc.Start()
+
+	storage, _ := app.storage.GetProvider("ftp")
+	filename := "ftp.txt"
+	path := "/"
+	file, _ := os.Open(filename)
+	defer file.Close()
+	storage.Put(filename, path, file, file)
 
 	// err = app.db.Drop(&models.Message{})
 	// if err != nil {

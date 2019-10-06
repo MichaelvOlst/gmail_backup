@@ -2689,12 +2689,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
-//
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -6355,25 +6349,6 @@ var render = function() {
                             },
                             expression:
                               "settings.storage_options[provider].StorageOption.active"
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("v-text-field", {
-                          attrs: { label: "Path", required: "" },
-                          model: {
-                            value:
-                              _vm.settings.storage_options[provider]
-                                .StorageOption.path,
-                            callback: function($$v) {
-                              _vm.$set(
-                                _vm.settings.storage_options[provider]
-                                  .StorageOption,
-                                "path",
-                                $$v
-                              )
-                            },
-                            expression:
-                              "settings.storage_options[provider].StorageOption.path"
                           }
                         }),
                         _vm._v(" "),
