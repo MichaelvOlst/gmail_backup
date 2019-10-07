@@ -3,6 +3,7 @@ package ftp
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/jlaffaye/ftp"
@@ -30,7 +31,7 @@ func (p *Provider) Name() string {
 // New initializer for Provider struct ftp
 func New(cfg Config) *Provider {
 
-	c, err := ftp.Dial(cfg.Host, ftp.DialWithTimeout(5*time.Second))
+	c, err := ftp.Dial(cfg.Host, ftp.DialWithTimeout(5*time.Second), ftp.DialWithDisabledEPSV(true))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,6 +41,21 @@ func New(cfg Config) *Provider {
 		log.Fatal(err)
 	}
 
+	// data := bytes.NewBufferString("Hello World")
+	// err = c.Stor("Public/test-file.txt", data)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	f, err := os.Open("ftp.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = c.Stor("/Public/ftp.txt", f)
+	if err != nil {
+		fmt.Println(err)
+	}
 	// fmt.Printf("%+v\n", c)
 
 	// err = c.ChangeDir("/Public")
@@ -62,12 +78,12 @@ func New(cfg Config) *Provider {
 	// 	fmt.Println(err)
 	// }
 
-	entries, err := c.List("/Public/")
-	if err != nil {
-		fmt.Println(err)
-	}
+	// entries, err := c.List("/Public/")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 	// entries, _ := c.List("/Public")
-	fmt.Printf("%+v\n", entries)
+	// fmt.Printf("%+v\n", entries)
 	// pwd, _ := c.CurrentDir()
 	// fmt.Println(pwd)
 
