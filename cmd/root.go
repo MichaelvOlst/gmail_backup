@@ -100,13 +100,15 @@ func initApp() {
 	app.account = acc
 	acc.Start()
 
-	storage, _ := app.storage.GetProvider("ftp")
-	filename := "ftp.txt"
-	path := "/"
-	file, _ := os.Open(filename)
-	defer file.Close()
-	storage.Put(filename, path, file, file)
-
+	// storage, _ := app.storage.GetProvider("ftp")
+	// filename := "ftp.txt"
+	// path := "/Public/"
+	// file, _ := os.Open(filename)
+	// defer file.Close()
+	// err = storage.Put(filename, path, file, file)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 	// err = app.db.Drop(&models.Message{})
 	// if err != nil {
 	// 	fmt.Println(err)

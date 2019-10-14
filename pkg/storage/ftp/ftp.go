@@ -1,9 +1,7 @@
 package ftp
 
 import (
-	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/jlaffaye/ftp"
@@ -47,15 +45,15 @@ func New(cfg Config) *Provider {
 	// 	log.Fatal(err)
 	// }
 
-	f, err := os.Open("ftp.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// f, err := os.Open("ftp.txt")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	err = c.Stor("/Public/ftp.txt", f)
-	if err != nil {
-		fmt.Println(err)
-	}
+	// err = c.Stor("/Public/ftp.txt", f)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 	// fmt.Printf("%+v\n", c)
 
 	// err = c.ChangeDir("/Public")
@@ -87,5 +85,5 @@ func New(cfg Config) *Provider {
 	// pwd, _ := c.CurrentDir()
 	// fmt.Println(pwd)
 
-	return &Provider{}
+	return &Provider{c}
 }

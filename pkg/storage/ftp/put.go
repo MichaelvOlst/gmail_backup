@@ -4,10 +4,18 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
-// Put returns google_drive
+// Put stores the file on the ftp location
 func (p *Provider) Put(filename, path string, file *os.File, r io.Reader) error {
-	fmt.Println("TODO " + filename)
+
+	path = strings.TrimRight(path, "/")
+	filenameBase := fmt.Sprintf("%s/%s", path, filename)
+
+	err := p.client.Stor(filenameBase, r)
+	if err != nil {
+		return err
+	}
 	return nil
 }

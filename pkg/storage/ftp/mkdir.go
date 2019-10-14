@@ -1,11 +1,8 @@
 package ftp
 
-import "fmt"
-
 // Mkdir returns google_drive
 func (p *Provider) Mkdir(path string) error {
-	fmt.Println("TODO " + path)
-	return nil
+	return p.client.MakeDir(path)
 }
 
 // IsNotExists check if a folder already exists

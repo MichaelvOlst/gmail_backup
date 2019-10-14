@@ -49,9 +49,9 @@ func (g *Gmail) collectMessages(user string, api *gmail.Service, ac *models.Acco
 			nextPageToken := r.NextPageToken
 			for {
 
-				// if counter == 0 {
-				// 	break
-				// }
+				if counter == 0 {
+					break
+				}
 
 				g.db.SaveAccountResult(ac, fmt.Sprintf("Messages: %d", len(lm)))
 				r, err := api.Users.Messages.List(user).LabelIds(label).IncludeSpamTrash(false).PageToken(nextPageToken).IncludeSpamTrash(false).Do()
